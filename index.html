@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Wikipedia Infinite Library</title>
+  <title>3D Wikipedia Dynamic Library</title>
   <style>
     body {
       margin: 0;
@@ -31,7 +31,7 @@
       width: 100%;
       text-align: center;
       color: #000;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       background: rgba(255, 255, 255, 0.95);
       padding: 20px 0;
@@ -40,7 +40,7 @@
       border-top: 3px solid black;
       border-bottom: 3px solid black;
     }
-    /* Minimap Widget */
+    /* Top-Right Minimap */
     #minimap-box {
       position: absolute;
       top: 20px;
@@ -58,12 +58,35 @@
       bottom: 2px;
       width: 100%;
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
       background: #000;
       color: #fff;
     }
-    /* Full Fast-Travel Map Overlay */
+    /* Search Desk Prompt Overlay */
+    #search-modal {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      background: #fdfcf7;
+      border: 4px solid #000;
+      box-shadow: 8px 8px 0px #000;
+      padding: 20px;
+      z-index: 30;
+      text-align: center;
+    }
+    #search-input {
+      width: 80%;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      border: 2px solid #000;
+      margin-bottom: 15px;
+    }
+    /* Full Map Modal */
     #full-map-modal {
       display: none;
       position: absolute;
@@ -78,32 +101,10 @@
       padding: 25px;
       z-index: 30;
     }
-    #full-map-modal h2 {
-      margin-top: 0;
-      text-align: center;
-      border-bottom: 2px solid black;
-      padding-bottom: 10px;
-    }
-    .map-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .map-btn {
-      padding: 15px;
-      background: #fff;
-      border: 2px solid #000;
-      font-weight: bold;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: center;
-      box-shadow: 3px 3px 0px #000;
-    }
-    .map-btn:hover {
-      background: #000;
-      color: #fff;
-    }
+    #full-map-modal h2 { margin-top: 0; text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; }
+    .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+    .map-btn { padding: 15px; background: #fff; border: 2px solid #000; font-weight: bold; font-family: inherit; cursor: pointer; text-align: center; box-shadow: 3px 3px 0px #000; }
+    .map-btn:hover { background: #000; color: #fff; }
     /* Book Overlay Reader UI */
     #book-modal {
       display: none;
@@ -123,26 +124,9 @@
       overflow-y: auto;
       z-index: 25;
     }
-    #book-modal h1 {
-      margin-top: 0;
-      border-bottom: 3px double #111;
-      padding-bottom: 10px;
-    }
-    #book-content p {
-      font-size: 16px;
-      line-height: 1.8;
-      text-indent: 20px;
-    }
-    .ui-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: #000;
-      color: #fff;
-      border: none;
-      font-family: inherit;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    #book-modal h1 { margin-top: 0; border-bottom: 3px double #111; padding-bottom: 10px; }
+    #book-content p { font-size: 16px; line-height: 1.8; text-indent: 20px; }
+    .ui-btn { margin-top: 15px; padding: 10px 20px; background: #000; color: #fff; border: none; font-family: inherit; font-weight: bold; cursor: pointer; }
     .ui-btn:hover { background: #444; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -151,42 +135,52 @@
 <body>
 
   <div id="crosshair"></div>
-  <div id="instructions">WELCOME TO THE WIKIPEDIA 3D LIBRARY<br><small>(Click to start walking | WASD = Move | Click Book = Read | M = Map)</small></div>
+  <div id="instructions">WIKIPEDIA ARCHITECTURAL LIBRARY<br><small>(Click to Walk | WASD = Move | Click Books/Desk = Interact | M = Map)</small></div>
 
-  <!-- Top-Right Minimap -->
+  <!-- Minimap -->
   <div id="minimap-box" onclick="toggleFullMap(true)">
     <canvas id="minimap-canvas" width="160" height="160"></canvas>
     <div id="minimap-label">CLICK FOR FAST TRAVEL</div>
+  </div>
+
+  <!-- Search Desk UI -->
+  <div id="search-modal">
+    <h3>SEARCH WIKIPEDIA DESK</h3>
+    <p>Type any topic to restock the Search Shelf:</p>
+    <input type="text" id="search-input" placeholder="e.g. Black Holes, Samurai..." onkeydown="if(event.key==='Enter') executeSearch()">
+    <br>
+    <button class="ui-btn" onclick="executeSearch()">Restock Shelf</button>
+    <button class="ui-btn" style="background:#666;" onclick="closeSearch()">Cancel</button>
   </div>
 
   <!-- Full Fast Travel Map Modal -->
   <div id="full-map-modal">
     <h2>LIBRARY MAP & FAST TRAVEL</h2>
     <div class="map-grid">
-      <button class="map-btn" onclick="teleportTo('Hub', 0, 0)">CENTRAL HUB</button>
-      <button class="map-btn" onclick="teleportTo('Science', -25, 0)">SCIENCE WING</button>
-      <button class="map-btn" onclick="teleportTo('History', 25, 0)">HISTORY WING</button>
-      <button class="map-btn" onclick="teleportTo('Technology', 0, -25)">TECH WING</button>
-      <button class="map-btn" onclick="teleportTo('Arts', 0, 25)">ARTS WING</button>
-      <button class="map-btn" onclick="teleportTo('Philosophy', -25, -25)">PHILOSOPHY</button>
+      <button class="map-btn" onclick="teleportTo(0, 0)">CENTRAL HUB / DESK</button>
+      <button class="map-btn" onclick="teleportTo(-30, 0)">SCIENCE WING</button>
+      <button class="map-btn" onclick="teleportTo(30, 0)">HISTORY WING</button>
+      <button class="map-btn" onclick="teleportTo(0, -30)">TECH WING</button>
+      <button class="map-btn" onclick="teleportTo(0, 30)">ARTS WING</button>
+      <button class="map-btn" onclick="teleportTo(-30, -30)">PHILOSOPHY WING</button>
     </div>
     <div style="text-align: center; margin-top: 20px;">
       <button class="ui-btn" onclick="toggleFullMap(false)">Close Map</button>
     </div>
   </div>
 
-  <!-- Book Reader UI Overlay -->
+  <!-- Book Reader UI -->
   <div id="book-modal">
     <h1 id="book-title">Loading...</h1>
     <div id="book-content">Fetching article contents...</div>
-    <button class="ui-btn" onclick="closeBook()">Close & Return to Library (ESC)</button>
+    <button class="ui-btn" onclick="closeBook()">Close Book (ESC)</button>
   </div>
 
   <script>
-    // --- 1. SETUP THREE.JS & BLACK/WHITE STYLE ---
+    // --- 1. SETUP SCENE & GRAPHICS ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf5f5f5);
-    scene.fog = new THREE.Fog(0xf5f5f5, 5, 45);
+    scene.fog = new THREE.Fog(0xf5f5f5, 5, 55);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 1.6, 0);
@@ -198,70 +192,116 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const gridFloor = new THREE.GridHelper(100, 100, 0x000000, 0xcccccc);
+    const gridFloor = new THREE.GridHelper(120, 120, 0x000000, 0xcccccc);
     scene.add(gridFloor);
 
-    // --- 2. GENERATE LIBRARY WINGS & SHELVES ---
-    const interactiveBooks = [];
+    const interactiveObjects = [];
     const raycaster = new THREE.Raycaster();
 
-    const categories = [
-      { name: "Science", x: -25, z: 0, topics: ["Physics", "Biology", "Astronomy", "Chemistry"] },
-      { name: "History", x: 25, z: 0, topics: ["Ancient Egypt", "World War II", "Renaissance", "Roman Empire"] },
-      { name: "Technology", x: 0, z: -25, topics: ["Computer science", "Artificial intelligence", "Internet", "Robotics"] },
-      { name: "Arts", x: 0, z: 25, topics: ["Sculpture", "Music history", "Architecture", "Cinema"] },
-      { name: "Philosophy", x: -25, z: -25, topics: ["Ethics", "Logic", "Epistemology", "Metaphysics"] }
-    ];
+    // --- 2. CENTRAL HUB & SEARCH DESK SHELF ---
+    // Search Terminal Desk Object
+    const deskGeo = new THREE.BoxGeometry(2.5, 1, 1.2);
+    const deskMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    const searchDesk = new THREE.Mesh(deskGeo, deskMat);
+    searchDesk.position.set(0, 0.5, -3);
+    searchDesk.userData = { type: 'searchDesk' };
+    scene.add(searchDesk);
+    interactiveObjects.push(searchDesk);
 
-    function createBookShelf(x, z, rotationY, articleTitles) {
-      const shelfGroup = new THREE.Group();
-      shelfGroup.position.set(x, 0, z);
-      shelfGroup.rotation.y = rotationY;
+    // Dedicated Search Shelf (Swaps books when a search is made)
+    let searchShelfGroup = new THREE.Group();
+    searchShelfGroup.position.set(0, 0, -5);
+    scene.add(searchShelfGroup);
 
-      // Bookcase Frame
-      const frameGeo = new THREE.BoxGeometry(4, 3, 0.6);
+    function buildSearchShelf(articles) {
+      // Clear previous books
+      while(searchShelfGroup.children.length > 0) {
+        const obj = searchShelfGroup.children[0];
+        const idx = interactiveObjects.indexOf(obj);
+        if (idx > -1) interactiveObjects.splice(idx, 1);
+        searchShelfGroup.remove(obj);
+      }
+
+      // Build Case
+      const frameGeo = new THREE.BoxGeometry(5, 3, 0.6);
       const frameMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
       const frame = new THREE.Mesh(frameGeo, frameMat);
       frame.position.y = 1.5;
-      shelfGroup.add(frame);
+      searchShelfGroup.add(frame);
 
-      // Books on Shelves
-      articleTitles.forEach((title, index) => {
+      // Populate Books
+      articles.forEach((title, index) => {
         const bookGeo = new THREE.BoxGeometry(0.2, 0.6, 0.4);
         const bookMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
         const book = new THREE.Mesh(bookGeo, bookMat);
-
-        book.position.set(-1.5 + (index * 0.8), 1.5, 0);
-        book.userData = { title: title };
-        shelfGroup.add(book);
-        interactiveBooks.push(book);
+        book.position.set(-2 + (index * 0.5), 1.5, 0);
+        book.userData = { type: 'book', title: title };
+        searchShelfGroup.add(book);
+        interactiveObjects.push(book);
       });
-
-      scene.add(shelfGroup);
     }
 
-    // Build central hub indicator
-    const hubGeo = new THREE.CylinderGeometry(2, 2, 0.1, 16);
-    const hubMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
-    const hub = new THREE.Mesh(hubGeo, hubMat);
-    scene.add(hub);
+    // Default initial search shelf contents
+    buildSearchShelf(["Wikipedia", "Library", "Encyclopedia", "Knowledge", "Information"]);
 
-    // Build Wing Shelves
-    categories.forEach(cat => {
-      createBookShelf(cat.x, cat.z - 2, 0, cat.topics);
-      createBookShelf(cat.x, cat.z + 2, Math.PI, cat.topics);
-    });
+    // --- 3. CATEGORY ARCHITECTURE GENERATOR ---
+    const categories = [
+      { name: "Science", categoryKey: "Category:Main_topic_classifications", x: -30, z: 0 },
+      { name: "History", categoryKey: "Category:History", x: 30, z: 0 },
+      { name: "Technology", categoryKey: "Category:Technology", x: 0, z: -30 },
+      { name: "Arts", categoryKey: "Category:Arts", x: 0, z: 30 },
+      { name: "Philosophy", categoryKey: "Category:Philosophy", x: -30, z: -30 }
+    ];
 
-    // --- 3. FIRST PERSON CONTROLS ---
+    async function generateCategoryWing(cat) {
+      const wingGroup = new THREE.Group();
+      wingGroup.position.set(cat.x, 0, cat.z);
+
+      // Fetch Sub-items from Wikipedia Category API
+      let subTopics = ["Overview", "Research", "Documentation", "Articles"];
+      try {
+        const url = `https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=${encodeURIComponent(cat.categoryKey)}&cmlimit=8&format=json&origin=*`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.query && data.query.categorymembers) {
+          subTopics = data.query.categorymembers.map(m => m.title.replace("Category:", ""));
+        }
+      } catch (e) { console.log("Category API load fallback used."); }
+
+      // Build Shelving Architecture based on Wikipedia data
+      const shelfGeo = new THREE.BoxGeometry(6, 3.5, 0.8);
+      const shelfMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+      
+      const shelf1 = new THREE.Mesh(shelfGeo, shelfMat);
+      shelf1.position.set(-2, 1.75, 0);
+      wingGroup.add(shelf1);
+
+      subTopics.forEach((title, i) => {
+        const bookGeo = new THREE.BoxGeometry(0.2, 0.6, 0.4);
+        const bookMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        const book = new THREE.Mesh(bookGeo, bookMat);
+        book.position.set(-4.5 + (i * 0.6), 1.75, 0);
+        book.userData = { type: 'book', title: title };
+        wingGroup.add(book);
+        interactiveObjects.push(book);
+      });
+
+      scene.add(wingGroup);
+    }
+
+    categories.forEach(cat => generateCategoryWing(cat));
+
+    // --- 4. CONTROLS & INTERACTION ---
     const controls = new THREE.PointerLockControls(camera, document.body);
     const instructions = document.getElementById('instructions');
+    const searchModal = document.getElementById('search-modal');
     const fullMapModal = document.getElementById('full-map-modal');
     const bookModal = document.getElementById('book-modal');
 
     instructions.addEventListener('click', () => controls.lock());
     controls.addEventListener('lock', () => instructions.style.display = 'none');
     controls.addEventListener('unlock', () => {
-      if (fullMapModal.style.display !== 'block' && bookModal.style.display !== 'block') {
+      if (searchModal.style.display !== 'block' && fullMapModal.style.display !== 'block' && bookModal.style.display !== 'block') {
         instructions.style.display = '';
       }
     });
@@ -286,59 +326,86 @@
       if (e.code === 'KeyD' || e.code === 'ArrowRight') moveRight = false;
     });
 
-    // --- 4. FAST TRAVEL & MAP SYSTEM ---
-    function toggleFullMap(show) {
-      if (show) {
-        controls.unlock();
-        fullMapModal.style.display = 'block';
-      } else {
-        fullMapModal.style.display = 'none';
-        controls.lock();
-      }
-    }
-
-    function teleportTo(locationName, x, z) {
-      camera.position.set(x, 1.6, z);
-      toggleFullMap(false);
-    }
-
-    // --- 5. INTERACTIVE WIKIPEDIA FETCHING ---
+    // Raycast Interaction
     document.addEventListener('click', () => {
       if (!controls.isLocked) return;
 
       raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(interactiveBooks);
+      const intersects = raycaster.intersectObjects(interactiveObjects);
 
       if (intersects.length > 0) {
-        const book = intersects[0].object;
-        openWikipediaArticle(book.userData.title);
+        const hitObj = intersects[0].object;
+        if (hitObj.userData.type === 'searchDesk') {
+          openSearch();
+        } else if (hitObj.userData.type === 'book') {
+          openWikipediaArticle(hitObj.userData.title);
+        }
       }
     });
+
+    // --- 5. SEARCH DESK & WIKIPEDIA LOGIC ---
+    function openSearch() {
+      controls.unlock();
+      searchModal.style.display = 'block';
+      document.getElementById('search-input').focus();
+    }
+
+    function closeSearch() {
+      searchModal.style.display = 'none';
+      controls.lock();
+    }
+
+    async function executeSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+
+      closeSearch();
+
+      try {
+        const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=8&format=json&origin=*`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const articleTitles = data[1] || [];
+
+        if (articleTitles.length > 0) {
+          buildSearchShelf(articleTitles);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
+      }
+    }
 
     async function openWikipediaArticle(title) {
       controls.unlock();
       bookModal.style.display = 'block';
       document.getElementById('book-title').innerText = title;
-      document.getElementById('book-content').innerHTML = "<p>Opening book from Wikipedia library...</p>";
+      document.getElementById('book-content').innerHTML = "<p>Retrieving Wikipedia article text...</p>";
 
       try {
         const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`);
         const htmlText = await response.text();
-        
-        // Sanitize & format HTML for book reader
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlText, 'text/html');
         const paragraphs = Array.from(doc.querySelectorAll('p')).map(p => p.outerHTML).join('');
-
-        document.getElementById('book-content').innerHTML = paragraphs || "<p>Empty article section.</p>";
+        document.getElementById('book-content').innerHTML = paragraphs || "<p>Article text preview unavailable.</p>";
       } catch (err) {
-        document.getElementById('book-content').innerText = "Could not load full article from Wikipedia API.";
+        document.getElementById('book-content').innerText = "Unable to fetch article from Wikipedia API.";
       }
     }
 
     function closeBook() {
       bookModal.style.display = 'none';
       controls.lock();
+    }
+
+    function toggleFullMap(show) {
+      if (show) { controls.unlock(); fullMapModal.style.display = 'block'; }
+      else { fullMapModal.style.display = 'none'; controls.lock(); }
+    }
+
+    function teleportTo(x, z) {
+      camera.position.set(x, 1.6, z);
+      toggleFullMap(false);
     }
 
     // --- 6. MINIMAP & RENDER LOOP ---
@@ -350,21 +417,21 @@
       ctx.fillStyle = '#f5f5f5';
       ctx.fillRect(0, 0, 160, 160);
 
-      // Draw Center Hub
+      // Center Hub
       ctx.strokeStyle = '#000';
       ctx.strokeRect(70, 70, 20, 20);
 
-      // Draw Wings
+      // Wings
       ctx.fillStyle = '#000';
       categories.forEach(cat => {
-        const mapX = 80 + (cat.x * 2.2);
-        const mapZ = 80 + (cat.z * 2.2);
-        ctx.fillRect(mapX - 5, mapZ - 5, 10, 10);
+        const mapX = 80 + (cat.x * 1.8);
+        const mapZ = 80 + (cat.z * 1.8);
+        ctx.fillRect(mapX - 4, mapZ - 4, 8, 8);
       });
 
-      // Draw Player Position dot
-      const px = 80 + (camera.position.x * 2.2);
-      const pz = 80 + (camera.position.z * 2.2);
+      // Player Position Dot
+      const px = 80 + (camera.position.x * 1.8);
+      const pz = 80 + (camera.position.z * 1.8);
       ctx.fillStyle = 'red';
       ctx.beginPath();
       ctx.arc(px, pz, 4, 0, Math.PI * 2);
