@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Wikipedia Architectural Library</title>
+  <title>Project Gutenberg 3D Grand Library</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
       font-family: 'Georgia', serif;
-      background-color: #111;
+      background-color: #0d0a08;
       user-select: none;
     }
     #crosshair {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border: 2px solid black;
+      width: 6px;
+      height: 6px;
+      background: #ffdfa9;
+      border: 2px solid #000;
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -30,43 +30,41 @@
       top: 50%;
       width: 100%;
       text-align: center;
-      color: #fff;
-      font-size: 20px;
-      font-weight: bold;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 25px 0;
+      color: #fcecd2;
+      font-size: 22px;
+      background: rgba(18, 12, 8, 0.92);
+      padding: 30px 0;
       cursor: pointer;
       z-index: 10;
-      border-top: 2px solid #aaa;
-      border-bottom: 2px solid #aaa;
+      border-top: 3px solid #8c6747;
+      border-bottom: 3px solid #8c6747;
     }
-    /* Floating Book Title Hover Tooltip */
     #hover-title {
       position: absolute;
-      bottom: 20%;
+      bottom: 15%;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.9);
-      color: #fff;
-      padding: 8px 16px;
+      background: rgba(15, 10, 6, 0.95);
+      color: #fcecd2;
+      padding: 10px 20px;
       border-radius: 4px;
-      border: 1px solid #fff;
+      border: 1px solid #8c6747;
       font-size: 16px;
-      font-family: sans-serif;
       pointer-events: none;
       display: none;
       z-index: 12;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
     }
-    /* Top-Right Minimap */
+    /* Minimap Widget */
     #minimap-box {
       position: absolute;
       top: 20px;
       right: 20px;
-      width: 150px;
-      height: 150px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 3px solid #000;
-      box-shadow: 4px 4px 0px #000;
+      width: 160px;
+      height: 160px;
+      background: #18110b;
+      border: 3px solid #8c6747;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.8);
       z-index: 15;
       cursor: pointer;
     }
@@ -78,34 +76,11 @@
       font-size: 10px;
       font-family: sans-serif;
       font-weight: bold;
-      background: #000;
-      color: #fff;
+      background: #8c6747;
+      color: #110c08;
       padding: 2px 0;
     }
-    /* Search Desk Overlay */
-    #search-modal {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 380px;
-      background: #fdfcf7;
-      border: 4px solid #000;
-      box-shadow: 8px 8px 0px #000;
-      padding: 25px;
-      z-index: 30;
-      text-align: center;
-    }
-    #search-input {
-      width: 85%;
-      padding: 10px;
-      font-family: inherit;
-      font-size: 16px;
-      border: 2px solid #000;
-      margin-bottom: 15px;
-    }
-    /* Full Map Fast Travel Modal */
+    /* Fast Travel & Map Overlay */
     #full-map-modal {
       display: none;
       position: absolute;
@@ -114,17 +89,43 @@
       transform: translate(-50%, -50%);
       width: 80%;
       max-width: 650px;
-      background: #fdfcf7;
-      border: 4px solid #000;
-      box-shadow: 8px 8px 0px #000;
+      background: #f7f1e5;
+      border: 4px solid #4a3324;
+      box-shadow: 12px 12px 0px #000;
       padding: 25px;
       z-index: 30;
     }
-    #full-map-modal h2 { margin-top: 0; text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; }
+    #full-map-modal h2 { margin-top: 0; text-align: center; border-bottom: 2px solid #4a3324; padding-bottom: 10px; color: #2c1d11; }
     .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-    .map-btn { padding: 15px; background: #fff; border: 2px solid #000; font-weight: bold; font-family: inherit; cursor: pointer; text-align: center; box-shadow: 3px 3px 0px #000; }
-    .map-btn:hover { background: #000; color: #fff; }
-    
+    .map-btn { padding: 15px; background: #ebdcc9; border: 2px solid #4a3324; font-weight: bold; font-family: inherit; color: #2c1d11; cursor: pointer; text-align: center; box-shadow: 3px 3px 0px #4a3324; }
+    .map-btn:hover { background: #4a3324; color: #f7f1e5; }
+
+    /* Search Desk Modal */
+    #search-modal {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      background: #f7f1e5;
+      border: 4px solid #4a3324;
+      box-shadow: 10px 10px 0px #000;
+      padding: 25px;
+      z-index: 30;
+      text-align: center;
+      color: #2c1d11;
+    }
+    #search-input {
+      width: 85%;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      border: 2px solid #4a3324;
+      margin-bottom: 15px;
+      background: #fff;
+    }
+
     /* Book Reader Overlay */
     #book-modal {
       display: none;
@@ -134,20 +135,21 @@
       transform: translate(-50%, -50%);
       width: 75%;
       max-width: 750px;
-      height: 80vh;
-      background: #fdfcf7;
-      color: #111;
-      border: 5px solid #222;
-      box-shadow: 12px 12px 0px #000;
-      padding: 35px;
+      height: 82vh;
+      background: #f4ecd8;
+      color: #2b1e16;
+      border: 6px solid #3d2619;
+      box-shadow: 15px 15px 0px #000;
+      padding: 40px;
       box-sizing: border-box;
       overflow-y: auto;
       z-index: 25;
     }
-    #book-modal h1 { margin-top: 0; border-bottom: 3px double #111; padding-bottom: 10px; font-size: 30px; }
-    #book-content p { font-size: 17px; line-height: 1.8; text-indent: 20px; }
-    .ui-btn { margin-top: 15px; padding: 10px 20px; background: #000; color: #fff; border: none; font-family: inherit; font-weight: bold; cursor: pointer; font-size: 14px; }
-    .ui-btn:hover { background: #444; }
+    #book-modal h1 { margin-top: 0; border-bottom: 2px solid #3d2619; padding-bottom: 8px; font-size: 28px; }
+    #book-modal h3 { margin-top: 0; font-style: italic; color: #664632; font-weight: normal; }
+    #book-content { font-size: 17px; line-height: 1.8; text-indent: 25px; white-space: pre-wrap; margin-top: 20px; }
+    .ui-btn { margin-top: 20px; padding: 10px 22px; background: #3d2619; color: #f4ecd8; border: none; font-family: inherit; font-weight: bold; cursor: pointer; font-size: 14px; }
+    .ui-btn:hover { background: #664632; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
@@ -156,52 +158,53 @@
 
   <div id="crosshair"></div>
   <div id="hover-title"></div>
-  <div id="instructions">ENTER THE WIKIPEDIA LIBRARY<br><small>(Click to Walk | WASD = Move | Look at Book = See Title | Click Book = Read | M = Map)</small></div>
+  <div id="instructions">GRAND GUTENBERG DIGITAL LIBRARY<br><small>(Click to Enter | WASD = Walk | Hover = Title | Click Book = Read | M = Map)</small></div>
 
-  <!-- Top-Right Minimap -->
+  <!-- Minimap -->
   <div id="minimap-box" onclick="toggleFullMap(true)">
-    <canvas id="minimap-canvas" width="150" height="150"></canvas>
-    <div id="minimap-label">FAST TRAVEL MAP (M)</div>
+    <canvas id="minimap-canvas" width="160" height="160"></canvas>
+    <div id="minimap-label">LIBRARY DIRECTORY (M)</div>
   </div>
 
   <!-- Search Desk Modal -->
   <div id="search-modal">
-    <h3>LIBRARY SEARCH DESK</h3>
-    <p>Enter any topic to restock the Central Search Shelf:</p>
-    <input type="text" id="search-input" placeholder="e.g. Quantum Physics, Mythology..." onkeydown="if(event.key==='Enter') executeSearch()">
+    <h3>LIBRARIAN'S CATALOG DESK</h3>
+    <p>Search Project Gutenberg's collection of 70,000+ public domain classics:</p>
+    <input type="text" id="search-input" placeholder="e.g. Shakespeare, Poe, Sci-Fi..." onkeydown="if(event.key==='Enter') executeSearch()">
     <br>
-    <button class="ui-btn" onclick="executeSearch()">Restock Shelf</button>
-    <button class="ui-btn" style="background:#666;" onclick="closeSearch()">Cancel</button>
+    <button class="ui-btn" onclick="executeSearch()">Stock Central Display</button>
+    <button class="ui-btn" style="background:#8c6747;" onclick="closeSearch()">Cancel</button>
   </div>
 
-  <!-- Fast Travel Map Modal -->
+  <!-- Fast Travel Directory -->
   <div id="full-map-modal">
-    <h2>LIBRARY MAP & FAST TRAVEL</h2>
+    <h2>LIBRARY WING DIRECTORY</h2>
     <div class="map-grid">
-      <button class="map-btn" onclick="teleportTo(0, 0)">CENTRAL LOBBY & DESK</button>
-      <button class="map-btn" onclick="teleportTo(-20, 0)">SCIENCE WING</button>
-      <button class="map-btn" onclick="teleportTo(20, 0)">HISTORY WING</button>
-      <button class="map-btn" onclick="teleportTo(0, -20)">TECH WING</button>
-      <button class="map-btn" onclick="teleportTo(0, 20)">ARTS WING</button>
-      <button class="map-btn" onclick="teleportTo(-20, -20)">PHILOSOPHY WING</button>
+      <button class="map-btn" onclick="teleportTo(0, 0)">ROTUNDA & DESK</button>
+      <button class="map-btn" onclick="teleportTo(-22, 0)">FICTION HALL</button>
+      <button class="map-btn" onclick="teleportTo(22, 0)">HISTORY WING</button>
+      <button class="map-btn" onclick="teleportTo(0, -22)">SCIENCE & TECH</button>
+      <button class="map-btn" onclick="teleportTo(0, 22)">POETRY & DRAMA</button>
+      <button class="map-btn" onclick="teleportTo(-22, -22)">PHILOSOPHY HALL</button>
     </div>
     <div style="text-align: center; margin-top: 20px;">
-      <button class="ui-btn" onclick="toggleFullMap(false)">Close Map</button>
+      <button class="ui-btn" onclick="toggleFullMap(false)">Resume Exploring</button>
     </div>
   </div>
 
-  <!-- Book Reader UI Overlay -->
+  <!-- Book Reader UI -->
   <div id="book-modal">
-    <h1 id="book-title">Loading...</h1>
-    <div id="book-content">Fetching article contents...</div>
-    <button class="ui-btn" onclick="closeBook()">Close & Put Back Book (ESC)</button>
+    <h1 id="book-title">Loading Title...</h1>
+    <h3 id="book-author">Author Unknown</h3>
+    <div id="book-content">Retrieving public domain manuscript from Project Gutenberg servers...</div>
+    <button class="ui-btn" onclick="closeBook()">Return Book to Shelf (ESC)</button>
   </div>
 
   <script>
-    // --- 1. THREE.JS SCENE SETUP ---
+    // --- 1. THREE.JS ATMOSPHERIC ARCHITECTURE ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdcd6cd); // Warm parchment atmosphere
-    scene.fog = new THREE.FogExp2(0xdcd6cd, 0.025);
+    scene.background = new THREE.Color(0x0f0b08);
+    scene.fog = new THREE.FogExp2(0x0f0b08, 0.035);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 1.6, 0);
@@ -210,96 +213,165 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Warm Ambient & Directional Lighting
-    const ambientLight = new THREE.AmbientLight(0xfff5ea, 0.8);
+    // Warm Ambient Light
+    const ambientLight = new THREE.AmbientLight(0xffdfa9, 0.4);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffeecc, 0.6);
-    dirLight.position.set(10, 20, 10);
-    scene.add(dirLight);
+    // Warm Brass Ceiling Lantern
+    const mainLantern = new THREE.PointLight(0xffb84d, 1.2, 40);
+    mainLantern.position.set(0, 5, 0);
+    scene.add(mainLantern);
 
-    // Floor Texture Grid
-    const floorGeo = new THREE.PlaneGeometry(100, 100);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x33261d, roughness: 0.8 });
+    // --- 2. ENCLOSED ROOM ARCHITECTURE (WALLS & WOOD FLOORS) ---
+    const colliders = [];
+
+    // Grand Floor (Dark Oak Wood Finish)
+    const floorGeo = new THREE.PlaneGeometry(70, 70);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x24170f, roughness: 0.6 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // --- 2. COLLISION & INTERACTION TRACKING ---
-    const colliders = [];
+    // Ceiling
+    const ceilGeo = new THREE.PlaneGeometry(70, 70);
+    const ceilMat = new THREE.MeshStandardMaterial({ color: 0x120c08, roughness: 0.9 });
+    const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
+    ceiling.position.y = 7;
+    ceiling.rotation.x = Math.PI / 2;
+    scene.add(ceiling);
+
+    // Perimeter Enclosed Walls (Plaster & Timber)
+    function createWall(x, z, w, h, d) {
+      const wallGeo = new THREE.BoxGeometry(w, h, d);
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.9 });
+      const wall = new THREE.Mesh(wallGeo, wallMat);
+      wall.position.set(x, h/2, z);
+      scene.add(wall);
+      colliders.push(wall);
+    }
+    createWall(0, -35, 70, 7, 1);
+    createWall(0, 35, 70, 7, 1);
+    createWall(-35, 0, 1, 7, 70);
+    createWall(35, 0, 1, 7, 70);
+
+    // Grand Columns
+    function createColumn(x, z) {
+      const colGeo = new THREE.CylinderGeometry(0.6, 0.6, 7, 12);
+      const colMat = new THREE.MeshStandardMaterial({ color: 0x1c120b, roughness: 0.7 });
+      const col = new THREE.Mesh(colGeo, colMat);
+      col.position.set(x, 3.5, z);
+      scene.add(col);
+      colliders.push(col);
+    }
+    createColumn(-8, -8); createColumn(8, -8);
+    createColumn(-8, 8);  createColumn(8, 8);
+
+    // --- 3. CATALOG DESK & BOOKSHELVES ---
     const interactiveObjects = [];
-    const raycaster = new THREE.Raycaster();
 
-    // --- 3. SEARCH DESK & CENTRAL SHELF ---
-    const deskGeo = new THREE.BoxGeometry(3, 1.1, 1.4);
-    const deskMat = new THREE.MeshStandardMaterial({ color: 0x1a120c });
-    const searchDesk = new THREE.Mesh(deskGeo, deskMat);
-    searchDesk.position.set(0, 0.55, -3);
-    searchDesk.userData = { type: 'searchDesk' };
-    scene.add(searchDesk);
-    interactiveObjects.push(searchDesk);
-    colliders.push(searchDesk);
+    // Oak Desk in Central Rotunda
+    const deskGeo = new THREE.BoxGeometry(3.2, 1.1, 1.5);
+    const deskMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1b, roughness: 0.5 });
+    const catalogDesk = new THREE.Mesh(deskGeo, deskMat);
+    catalogDesk.position.set(0, 0.55, -3);
+    catalogDesk.userData = { type: 'searchDesk' };
+    scene.add(catalogDesk);
+    interactiveObjects.push(catalogDesk);
+    colliders.push(catalogDesk);
 
+    // Brass Desk Lamp Light
+    const deskLamp = new THREE.PointLight(0xffa200, 1.5, 8);
+    deskLamp.position.set(0, 1.5, -3);
+    scene.add(deskLamp);
+
+    // Dedicated Search Shelf
     let searchShelfGroup = new THREE.Group();
-    searchShelfGroup.position.set(0, 0, -6);
+    searchShelfGroup.position.set(0, 0, -6.5);
     scene.add(searchShelfGroup);
 
-    function buildShelfStructure(group, x, y, z, rotY) {
+    function buildBookshelf(group, x, y, z, rotY) {
       group.position.set(x, y, z);
       group.rotation.y = rotY;
 
-      // Wooden Frame
-      const frameGeo = new THREE.BoxGeometry(4.5, 3.2, 0.6);
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x2b1d14 });
+      // Tall Wooden Bookcase Frame
+      const frameGeo = new THREE.BoxGeometry(5.5, 4.2, 0.8);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x26160c, roughness: 0.6 });
       const frame = new THREE.Mesh(frameGeo, frameMat);
-      frame.position.y = 1.6;
+      frame.position.y = 2.1;
       group.add(frame);
       colliders.push(frame);
+
+      // Shelving Light
+      const light = new THREE.PointLight(0xffc266, 0.6, 6);
+      light.position.set(0, 3, 0.5);
+      group.add(light);
     }
 
-    function populateBooksOnShelf(group, titles) {
+    function populateGutenbergBooks(group, booksData) {
       // Clear old books
-      for(let i = group.children.length - 1; i >= 0; i--) {
+      for (let i = group.children.length - 1; i >= 0; i--) {
         const obj = group.children[i];
-        if(obj.userData && obj.userData.type === 'book') {
+        if (obj.userData && obj.userData.type === 'book') {
           const idx = interactiveObjects.indexOf(obj);
           if (idx > -1) interactiveObjects.splice(idx, 1);
           group.remove(obj);
         }
       }
 
-      // Add labeled books
-      titles.forEach((title, i) => {
-        const bookGeo = new THREE.BoxGeometry(0.25, 0.7, 0.45);
-        const bookMat = new THREE.MeshStandardMaterial({ color: (i % 2 === 0) ? 0x8b0000 : 0x1a365d });
-        const book = new THREE.Mesh(bookGeo, bookMat);
-        book.position.set(-1.8 + (i * 0.5), 1.6, 0);
-        book.userData = { type: 'book', title: title };
-        group.add(book);
-        interactiveObjects.push(book);
+      // Spawn books on shelves
+      const spineColors = [0x7a1c1c, 0x1c3b7a, 0x1c7a3b, 0x5a1c7a, 0x6e511c];
+      booksData.slice(0, 9).forEach((book, i) => {
+        const bookGeo = new THREE.BoxGeometry(0.28, 0.8, 0.5);
+        const bookMat = new THREE.MeshStandardMaterial({
+          color: spineColors[i % spineColors.length],
+          roughness: 0.4
+        });
+        const mesh = new THREE.Mesh(bookGeo, bookMat);
+        mesh.position.set(-2.0 + (i * 0.48), 2.1, 0.1);
+        mesh.userData = {
+          type: 'book',
+          title: book.title,
+          author: book.authors && book.authors[0] ? book.authors[0].name : "Unknown Author",
+          id: book.id
+        };
+        group.add(mesh);
+        interactiveObjects.push(mesh);
       });
     }
 
-    buildShelfStructure(searchShelfGroup, 0, 0, -6, 0);
-    populateBooksOnShelf(searchShelfGroup, ["Wikipedia", "Library of Alexandria", "Encyclopedia", "Printing press"]);
+    buildBookshelf(searchShelfGroup, 0, 0, -6.5, 0);
 
-    // --- 4. WINGS & CATEGORY SHELVES ---
+    // Initial load of Gutenberg classics for the central shelf
+    async function loadDefaultBooks() {
+      try {
+        const res = await fetch('https://gutendex.com/books/?sort=popular');
+        const data = await res.json();
+        populateGutenbergBooks(searchShelfGroup, data.results);
+      } catch(e) { console.error("Could not fetch Gutenberg defaults."); }
+    }
+    loadDefaultBooks();
+
+    // --- 4. CATEGORY WINGS ---
     const categories = [
-      { name: "Science", x: -20, z: 0, topics: ["Physics", "Quantum mechanics", "Astronomy", "Biology"] },
-      { name: "History", x: 20, z: 0, topics: ["Ancient Egypt", "Roman Empire", "Industrial Revolution", "Renaissance"] },
-      { name: "Technology", x: 0, z: -20, topics: ["Computer science", "Artificial intelligence", "Internet", "Robotics"] },
-      { name: "Arts", x: 0, z: 20, topics: ["Architecture", "Sculpture", "Music history", "Cinema"] },
-      { name: "Philosophy", x: -20, z: -20, topics: ["Ethics", "Logic", "Epistemology", "Metaphysics"] }
+      { name: "Fiction", topic: "fiction", x: -22, z: 0 },
+      { name: "History", topic: "history", x: 22, z: 0 },
+      { name: "Science", topic: "science", x: 0, z: -22 },
+      { name: "Poetry", topic: "poetry", x: 0, z: 22 },
+      { name: "Philosophy", topic: "philosophy", x: -22, z: -22 }
     ];
 
     categories.forEach(cat => {
       const wingGroup = new THREE.Group();
       scene.add(wingGroup);
-      buildShelfStructure(wingGroup, cat.x, 0, cat.z, 0);
-      populateBooksOnShelf(wingGroup, cat.topics);
+      buildBookshelf(wingGroup, cat.x, 0, cat.z, 0);
+
+      fetch(`https://gutendex.com/books/?topic=${cat.topic}`)
+        .then(res => res.json())
+        .then(data => populateGutenbergBooks(wingGroup, data.results))
+        .catch(err => console.log("Category load failed."));
     });
 
-    // --- 5. FIRST PERSON CONTROLS & COLLISION SYSTEM ---
+    // --- 5. FIRST-PERSON NAVIGATION & COLLISION ---
     const controls = new THREE.PointerLockControls(camera, document.body);
     const instructions = document.getElementById('instructions');
     const hoverTitle = document.getElementById('hover-title');
@@ -340,7 +412,9 @@
       if (e.code === 'KeyD' || e.code === 'ArrowRight') moveRight = false;
     });
 
-    // --- 6. INTERACTION & RAYCASTING ---
+    // Raycast Interaction & Tooltips
+    const raycaster = new THREE.Raycaster();
+
     document.addEventListener('click', () => {
       if (!controls.isLocked) return;
 
@@ -352,12 +426,12 @@
         if (hit.userData.type === 'searchDesk') {
           openSearch();
         } else if (hit.userData.type === 'book') {
-          openWikipediaArticle(hit.userData.title);
+          openGutenbergBook(hit.userData);
         }
       }
     });
 
-    function checkHoverTitles() {
+    function checkHoverTooltips() {
       if (!controls.isLocked) {
         hoverTitle.style.display = 'none';
         return;
@@ -369,17 +443,17 @@
         const hit = intersects[0].object;
         if (hit.userData.type === 'book') {
           hoverTitle.style.display = 'block';
-          hoverTitle.innerText = `Book: "${hit.userData.title}" (Click to Read)`;
+          hoverTitle.innerText = `Book: "${hit.userData.title}" by ${hit.userData.author}`;
         } else if (hit.userData.type === 'searchDesk') {
           hoverTitle.style.display = 'block';
-          hoverTitle.innerText = `Search Terminal Desk (Click to Search Topic)`;
+          hoverTitle.innerText = `Catalog Search Desk (Click to Search Gutenberg)`;
         }
       } else {
         hoverTitle.style.display = 'none';
       }
     }
 
-    // --- 7. MODALS & API FETCHING ---
+    // --- 6. GUTENDEX API FETCHING & MANUSCRIPT READER ---
     function openSearch() {
       controls.unlock();
       searchModal.style.display = 'block';
@@ -397,32 +471,39 @@
       closeSearch();
 
       try {
-        const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=7&format=json&origin=*`;
-        const res = await fetch(url);
+        const res = await fetch(`https://gutendex.com/books/?search=${encodeURIComponent(query)}`);
         const data = await res.json();
-        const titles = data[1] || [];
-        if (titles.length > 0) {
-          populateBooksOnShelf(searchShelfGroup, titles);
+        if (data.results && data.results.length > 0) {
+          populateGutenbergBooks(searchShelfGroup, data.results);
         }
       } catch (e) { console.error("Search failed:", e); }
     }
 
-    async function openWikipediaArticle(title) {
+    async function openGutenbergBook(bookData) {
       controls.unlock();
       bookModal.style.display = 'block';
-      document.getElementById('book-title').innerText = title;
-      document.getElementById('book-content').innerHTML = "<p>Opening book and fetching Wikipedia text...</p>";
+      document.getElementById('book-title').innerText = bookData.title;
+      document.getElementById('book-author').innerText = `by ${bookData.author}`;
+      document.getElementById('book-content').innerText = "Opening manuscript and loading text from Project Gutenberg...";
 
       try {
-        const url = `https://en.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`;
-        const res = await fetch(url);
-        const htmlText = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
-        const paragraphs = Array.from(doc.querySelectorAll('p')).map(p => p.outerHTML).join('');
-        document.getElementById('book-content').innerHTML = paragraphs || "<p>Summary unavailable for this article.</p>";
+        // Fetch raw manuscript text directly from Gutenberg via cors proxy/API URL
+        const txtUrl = `https://www.gutenberg.org/files/${bookData.id}/${bookData.id}-0.txt`;
+        const fallbackUrl = `https://www.gutenberg.org/cache/epub/${bookData.id}/pg${bookData.id}.txt`;
+        
+        let res = await fetch(txtUrl);
+        if (!res.ok) res = await fetch(fallbackUrl);
+
+        if (res.ok) {
+          const rawText = await res.text();
+          // Display the first 5,000 characters cleanly as a readable excerpt
+          const cleanText = rawText.substring(0, 5000) + "\n\n[... Continued in Project Gutenberg Collection ...]";
+          document.getElementById('book-content').innerText = cleanText;
+        } else {
+          document.getElementById('book-content').innerText = "Public domain full text is available via Project Gutenberg ID #" + bookData.id;
+        }
       } catch (e) {
-        document.getElementById('book-content').innerText = "Failed to load article from Wikipedia.";
+        document.getElementById('book-content').innerText = "Public Domain Title: " + bookData.title + "\n\nAuthor: " + bookData.author + "\n\nCatalog Gutenberg ID: #" + bookData.id;
       }
     }
 
@@ -441,31 +522,31 @@
       controls.lock();
     }
 
-    // --- 8. MINIMAP & ANIMATION LOOP ---
+    // --- 7. MINIMAP & RENDER LOOP ---
     const minimapCanvas = document.getElementById('minimap-canvas');
     const ctx = minimapCanvas.getContext('2d');
 
     function drawMinimap() {
-      ctx.clearRect(0, 0, 150, 150);
-      ctx.fillStyle = '#e6dfd5';
-      ctx.fillRect(0, 0, 150, 150);
+      ctx.clearRect(0, 0, 160, 160);
+      ctx.fillStyle = '#18110b';
+      ctx.fillRect(0, 0, 160, 160);
 
-      // Draw Center Hub
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(65, 65, 20, 20);
+      // Rotunda Hub
+      ctx.strokeStyle = '#8c6747';
+      ctx.strokeRect(70, 70, 20, 20);
 
-      // Draw Wings
-      ctx.fillStyle = '#444';
+      // Category Wings
+      ctx.fillStyle = '#8c6747';
       categories.forEach(cat => {
-        const mx = 75 + (cat.x * 2.5);
-        const mz = 75 + (cat.z * 2.5);
+        const mx = 80 + (cat.x * 2.1);
+        const mz = 80 + (cat.z * 2.1);
         ctx.fillRect(mx - 5, mz - 5, 10, 10);
       });
 
-      // Draw Player Position Dot
-      const px = 75 + (camera.position.x * 2.5);
-      const pz = 75 + (camera.position.z * 2.5);
-      ctx.fillStyle = 'red';
+      // Red Player Dot
+      const px = 80 + (camera.position.x * 2.1);
+      const pz = 80 + (camera.position.z * 2.1);
+      ctx.fillStyle = '#ff3333';
       ctx.beginPath();
       ctx.arc(px, pz, 4, 0, Math.PI * 2);
       ctx.fill();
@@ -485,16 +566,15 @@
         direction.x = Number(moveRight) - Number(moveLeft);
         direction.normalize();
 
-        if (moveForward || moveBackward) velocity.z -= direction.z * 30.0 * delta;
-        if (moveLeft || moveRight) velocity.x -= direction.x * 30.0 * delta;
+        if (moveForward || moveBackward) velocity.z -= direction.z * 28.0 * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * 28.0 * delta;
 
-        // Save old position for collision checks
+        // Collision detection against walls, columns & bookcases
         const oldPos = camera.position.clone();
 
         controls.moveRight(-velocity.x * delta);
         controls.moveForward(-velocity.z * delta);
 
-        // Simple AABB Collision box check against shelves & desk
         const playerRadius = 0.5;
         colliders.forEach(obj => {
           const box = new THREE.Box3().setFromObject(obj);
@@ -503,13 +583,13 @@
             new THREE.Vector3(camera.position.x + playerRadius, 2, camera.position.z + playerRadius)
           );
           if (box.intersectsBox(playerBox)) {
-            camera.position.copy(oldPos); // Revert position on collision
+            camera.position.copy(oldPos);
           }
         });
       }
       prevTime = time;
 
-      checkHoverTitles();
+      checkHoverTooltips();
       drawMinimap();
       renderer.render(scene, camera);
     }
