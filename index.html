@@ -3,330 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Wave Survival</title>
+    <title>OmniMedia - Unified Music & Video Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #111; color: #fff; font-family: monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #game-container { position: relative; width: 800px; height: 600px; border: 4px solid #444; }
-        canvas { width: 100%; height: 100%; display: block; background: #000; }
-        #ui { position: absolute; top: 10px; left: 10px; font-size: 18px; text-shadow: 2px 2px #000; pointer-events: none; }
-        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0f0; font-size: 24px; pointer-events: none; }
-        #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(150, 0, 0, 0.7); display: none; flex-direction: column; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; }
-        #weapon-hud { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 150px; pointer-events: none; display: flex; justify-content: center; align-items: flex-end; }
-        .gun { width: 80px; height: 100px; background: #555; border: 4px solid #222; border-radius: 8px 8px 0 0; }
-        .shotgun { width: 100px; height: 120px; background: #443322; border: 4px solid #111; }
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Apple Music Glassmorphic & Gradient Accents */
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .apple-gradient {
+            background: linear-gradient(135deg, #fa233b 0%, #fb5c74 100%);
+        }
+        .spotify-gradient {
+            background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+        }
+        .youtube-gradient {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+        }
+        
+        /* Ambient background aura */
+        .ambient-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            filter: blur(140px);
+            opacity: 0.25;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: all 1s ease-in-out;
+            z-index: 0;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
-<body>
-    <div id="game-container">
-        <canvas id="canvas" width="640" height="480"></canvas>
-        <div id="ui">
-            <div>HEALTH: <span id="hp">100</span>%</div>
-            <div>WAVE: <span id="wave">1</span></div>
-            <div>ENEMIES: <span id="enemies">0</span></div>
-            <div>WEAPON: <span id="weapon-name">Pistol</span></div>
-            <div>AMMO: <span id="ammo">Infinite</span></div>
-        </div>
-        <div id="crosshair">+</div>
-        <div id="weapon-hud"><div id="gun-graphic" class="gun"></div></div>
-        <div id="game-over">
-            <div>GAME OVER</div>
-            <div style="font-size: 18px; margin-top: 10px;">Click to Restart</div>
-        </div>
+<body class="bg-black text-white font-sans antialiased h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- Ambient Gradient Backdrops -->
+    <div id="ambient-aura-1" class="ambient-bg apple-gradient -top-40 -left-40"></div>
+    <div id="ambient-aura-2" class="ambient-bg spotify-gradient -bottom-40 -right-40"></div>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <div class="relative z-10 flex flex-1 h-[calc(100vh-90px)] overflow-hidden">
+
+        <!-- SIDEBAR (Spotify Structure + Apple Clean Aesthetics) -->
+        <aside class="w-64 glass-panel flex flex-col justify-between p-4 border-r border-white/10 shrink-0">
+            <div class="space-y-6">
+                <!-- Branding Header -->
+                <div class="flex items-center space-x-3 px-2">
+                    <div class="w-9 h-9 rounded-xl apple-gradient flex items-center justify-center shadow-lg shadow-red-500/20">
+                        <i data-lucide="disc-3" class="w-5 h-5 text-white animate-spin-slow"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">
+                        OmniStream
+                    </span>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-1">
+                    <button onclick="switchTab('explore')" id="nav-explore" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition bg-white/10 text-white">
+                        <i data-lucide="compass" class="w-5 h-5 text-red-500"></i>
+                        <span>Explore Hub</span>
+                    </button>
+                    <button onclick="switchTab('youtube')" id="nav-youtube" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                        <i data-lucide="youtube" class="w-5 h-5 text-red-600"></i>
+                        <span>YouTube Vault</span>
+                    </button>
+                    <button onclick="switchTab('spotify')" id="nav-spotify" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                        <i data-lucide="music-2" class="w-5 h-5 text-emerald-500"></i>
+                        <span>Spotify Playlists</span>
+                    </button>
+                    <button onclick="switchTab('apple')" id="nav-apple" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                        <i data-lucide="radio" class="w-5 h-5 text-pink-500"></i>
+                        <span>Apple Radio</span>
+                    </button>
+                </nav>
+
+                <!-- Library Section -->
+                <div>
+                    <h3 class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Your Library</h3>
+                    <div class="space-y-1">
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition">
+                            <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
+                            <span>Liked Songs</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition">
+                            <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+                            <span>Recent History</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition">
+                            <i data-lucide="list-music" class="w-4 h-4 text-purple-400"></i>
+                            <span>Custom Mixes</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Filters Badge -->
+            <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span class="text-xs font-semibold text-gray-400 block mb-2">Connected Engines</span>
+                <div class="flex items-center justify-between">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" title="Spotify Active"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" title="Apple Music Active"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm shadow-red-600/50" title="YouTube Active"></span>
+                    <span class="text-xs text-gray-300 font-mono">Sync Mode: ON</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER CONTENT DISPLAY -->
+        <main class="flex-1 flex flex-col overflow-y-auto relative">
+            
+            <!-- Top Bar Header -->
+            <header class="sticky top-0 z-20 glass-panel border-b border-white/5 px-8 py-4 flex items-center justify-between">
+                <!-- Search Bar -->
+                <div class="relative w-96">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Search across Spotify, Apple Music & YouTube..." 
+                           class="w-full bg-white/10 text-white placeholder-gray-400 text-sm rounded-full pl-10 pr-4 py-2 border border-white/10 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition">
+                </div>
+
+                <!-- Platform Filters (YouTube Chips style) -->
+                <div class="flex items-center space-x-2">
+                    <button class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-black hover:bg-gray-200 transition">All Feeds</button>
+                    <button class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white transition flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Spotify Tracks</span>
+                    </button>
+                    <button class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white transition flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                        <span>Apple Music</span>
+                    </button>
+                    <button class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white transition flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-600"></span>
+                        <span>YouTube Videos</span>
+                    </button>
+                </div>
+
+                <!-- Profile Action -->
+                <div class="flex items-center space-x-3">
+                    <button class="p-2 rounded-full hover:bg-white/10 text-gray-300 hover:text-white transition">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+                    <div class="w-8 h-8 rounded-full apple-gradient flex items-center justify-center font-bold text-xs ring-2 ring-white/20">
+                        ME
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Views Container -->
+            <div class="p-8 space-y-8">
+                
+                <!-- FEATURED BANNER (Apple Music Hero Style) -->
+                <section class="relative rounded-2xl overflow-hidden glass-panel border border-white/10 p-8 flex flex-col justify-end min-h-[260px]">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-900/40 via-purple-900/20 to-black/80 z-0"></div>
+                    <div class="relative z-10 max-w-xl space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded border border-red-500/40 bg-red-500/10 text-red-400 text-xs font-bold uppercase tracking-wide">Unified Exclusive</span>
+                            <span class="text-xs text-gray-400 font-medium">Apple Music Studio Mix</span>
+                        </div>
+                        <h1 class="text-4xl font-extrabold tracking-tight">Midnight Synthwave Odyssey</h1>
+                        <p class="text-sm text-gray-300 line-clamp-2">Experience spatial audio mastery integrated with live YouTube visualizers and curated Spotify algorithmic playlists.</p>
+                        <div class="flex items-center space-x-4 pt-2">
+                            <button onclick="playTrack('Midnight Synthwave Odyssey', 'Kavinsky & The Weeknd', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400', 'youtube')" 
+                                    class="px-6 py-2.5 rounded-full apple-gradient text-white text-sm font-bold shadow-lg shadow-red-500/30 hover:scale-105 active:scale-95 transition flex items-center space-x-2">
+                                <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                                <span>Stream Now</span>
+                            </button>
+                            <button class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition border border-white/10">
+                                Save to Library
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 1: YouTube Video Feed Grid (YouTube-style Card Layout) -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="youtube" class="w-5 h-5 text-red-600"></i>
+                            <h2 class="text-xl font-bold tracking-tight">Trending YouTube Visuals</h2>
+                        </div>
+                        <a href="#" class="text-xs font-semibold text-gray-400 hover:text-white transition">View All</a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="youtube-grid">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- SECTION 2: Spotify Modern Track Rows (Spotify List View) -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="disc" class="w-5 h-5 text-emerald-500"></i>
+                            <h2 class="text-xl font-bold tracking-tight">Spotify Daily Mix Tracks</h2>
+                        </div>
+                        <a href="#" class="text-xs font-semibold text-gray-400 hover:text-white transition">Show All</a>
+                    </div>
+
+                    <div class="glass-panel rounded-xl border border-white/5 divide-y divide-white/5" id="spotify-list">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- SECTION 3: Apple Music Album Cards (Apple Clean Cards) -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="radio" class="w-5 h-5 text-pink-500"></i>
+                            <h2 class="text-xl font-bold tracking-tight">Apple Music Top Albums</h2>
+                        </div>
+                        <a href="#" class="text-xs font-semibold text-gray-400 hover:text-white transition">Browse Categories</a>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="apple-albums font-sans">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+            </div>
+        </main>
     </div>
 
+    <!-- GLOBAL PERSISTENT PLAYER BAR (Bottom Deck - Spotify/Apple Hybrid) -->
+    <footer class="h-[90px] glass-panel border-t border-white/10 px-6 flex items-center justify-between z-30 relative">
+        
+        <!-- Currently Playing Metadata -->
+        <div class="flex items-center space-x-4 w-1/4">
+            <div class="relative group cursor-pointer">
+                <img id="player-cover" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400" alt="Cover" class="w-14 h-14 rounded-lg object-cover shadow-md border border-white/10">
+                <div class="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <i data-lucide="maximize-2" class="w-4 h-4 text-white"></i>
+                </div>
+            </div>
+            <div class="truncate">
+                <h4 id="player-title" class="text-sm font-semibold text-white truncate">Select a Track to Play</h4>
+                <p id="player-artist" class="text-xs text-gray-400 truncate">Unified Cross-Engine Sync</p>
+                <!-- Platform Badge -->
+                <span id="player-badge" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 mt-1">
+                    SPOTIFY ENGINE
+                </span>
+            </div>
+            <button class="text-gray-400 hover:text-rose-500 transition">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Center Player Controls -->
+        <div class="flex flex-col items-center w-2/4 max-w-xl px-4">
+            <!-- Playback Action Buttons -->
+            <div class="flex items-center space-x-6 mb-1.5">
+                <button class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="shuffle" class="w-4 h-4"></i>
+                </button>
+                <button class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="skip-back" class="w-5 h-5 fill-current"></i>
+                </button>
+                <button id="play-pause-btn" onclick="togglePlay()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg">
+                    <i id="play-icon" data-lucide="play" class="w-5 h-5 fill-black ml-0.5"></i>
+                </button>
+                <button class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i>
+                </button>
+                <button class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="repeat" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full flex items-center space-x-3 text-xs text-gray-400 font-mono">
+                <span id="current-time">1:24</span>
+                <div class="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden cursor-pointer relative group">
+                    <div id="progress-bar" class="h-full apple-gradient w-1/3 rounded-full relative">
+                        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition shadow"></div>
+                    </div>
+                </div>
+                <span id="total-time">3:45</span>
+            </div>
+        </div>
+
+        <!-- Right Side Utility Controls -->
+        <div class="flex items-center justify-end space-x-4 w-1/4">
+            <button class="text-gray-400 hover:text-white transition" title="Apple Spatial Audio / Lyrics">
+                <i data-lucide="quote" class="w-4 h-4"></i>
+            </button>
+            <button class="text-gray-400 hover:text-white transition" title="Queue">
+                <i data-lucide="list-video" class="w-4 h-4"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <i data-lucide="volume-2" class="w-4 h-4 text-gray-400"></i>
+                <div class="w-20 h-1.5 bg-white/10 rounded-full cursor-pointer relative">
+                    <div class="h-full bg-white/60 rounded-full w-3/4"></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Map Definition: 16x16 Room
-        // 1 = Wall, 2 = Shelf, 0 = Empty Space
-        const MAP_WIDTH = 16;
-        const MAP_HEIGHT = 16;
-        const TILE_SIZE = 64;
-        const map = [
-            1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,0,2,2,0,0,0,0,0,0,0,0,2,2,0,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,0,0,0,1,1,0,0,0,0,1,1,0,0,0,1,
-            1,0,0,0,1,1,0,0,0,0,1,1,0,0,0,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,0,2,0,0,0,0,1,1,0,0,0,0,2,0,1,
-            1,0,2,0,0,0,0,1,1,0,0,0,0,2,0,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,0,0,0,1,1,0,0,0,0,1,1,0,0,0,1,
-            1,0,0,0,1,1,0,0,0,0,1,1,0,0,0,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,0,2,2,0,0,0,0,0,0,0,0,2,2,0,1,
-            1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-        ];
-
-        // Player State
-        const player = {
-            x: 8 * TILE_SIZE,
-            y: 8 * TILE_SIZE,
-            angle: 0,
-            fov: Math.PI / 3,
-            hp: 100,
-            currentWeapon: 0
+        // Mock Data for YouTube, Spotify, and Apple Music
+        const mediaItems = {
+            youtube: [
+                { id: 1, title: 'Lofi Hip Hop Radio - Beats to Relax/Study', artist: 'Lofi Girl', cover: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500', views: '2.4M watching', type: 'youtube' },
+                { id: 2, title: 'Cyberpunk 2077 Night City Official OST Visualizer', artist: 'Refused', cover: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500', views: '1.2M views', type: 'youtube' },
+                { id: 3, title: 'Live Symphony Orchestra - Beethoven No. 5 (4K)', artist: 'BBC Orchestra', cover: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=500', views: '890K views', type: 'youtube' },
+                { id: 4, title: 'Chill Synthwave Highway Driving Visuals', artist: 'Neon Nights', cover: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500', views: '540K views', type: 'youtube' }
+            ],
+            spotify: [
+                { id: 5, title: 'Blinding Lights', artist: 'The Weeknd', album: 'After Hours', duration: '3:20', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400', type: 'spotify' },
+                { id: 6, title: 'Starboy', artist: 'The Weeknd ft. Daft Punk', album: 'Starboy', duration: '3:50', cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400', type: 'spotify' },
+                { id: 7, title: 'As It Was', artist: 'Harry Styles', album: 'Harry\'s House', duration: '2:47', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400', type: 'spotify' },
+                { id: 8, title: 'Levitating', artist: 'Dua Lipa', album: 'Future Nostalgia', duration: '3:23', cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400', type: 'spotify' }
+            ],
+            apple: [
+                { id: 9, title: 'Un Verano Sin Ti', artist: 'Bad Bunny', cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400', genre: 'Latin Pop', type: 'apple' },
+                { id: 10, title: 'Midnights (3am Edition)', artist: 'Taylor Swift', cover: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400', genre: 'Pop', type: 'apple' },
+                { id: 11, title: 'Renaissance', artist: 'Beyoncé', cover: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400', genre: 'Dance/Electronic', type: 'apple' },
+                { id: 12, title: 'SOS', artist: 'SZA', cover: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400', genre: 'R&B', type: 'apple' },
+                { id: 13, title: 'Dawn FM', artist: 'The Weeknd', cover: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400', genre: 'Synth-Pop', type: 'apple' },
+                { id: 14, title: 'Chromatica', artist: 'Lady Gaga', cover: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400', genre: 'Dance', type: 'apple' }
+            ]
         };
 
-        const weapons = [
-            { name: "Pistol", damage: 25, rate: 400, ammo: Infinity, pellets: 1, color: "#555" },
-            { name: "Shotgun", damage: 15, rate: 800, ammo: 20, pellets: 5, color: "#443322" },
-            { name: "Plasma Cannon", damage: 50, rate: 200, ammo: 40, pellets: 1, color: "#2244aa" }
-        ];
+        let isPlaying = false;
 
-        let keys = {};
-        let enemies = [];
-        let items = [
-            { x: 3 * TILE_SIZE, y: 3 * TILE_SIZE, type: "weapon", weaponIndex: 1 },
-            { x: 12 * TILE_SIZE, y: 3 * TILE_SIZE, type: "weapon", weaponIndex: 2 },
-            { x: 3 * TILE_SIZE, y: 12 * TILE_SIZE, type: "ammo", amount: 15 },
-            { x: 12 * TILE_SIZE, y: 12 * TILE_SIZE, type: "ammo", amount: 15 }
-        ];
+        // Render Functions
+        function renderDashboard() {
+            // Render YouTube Grid
+            const youtubeContainer = document.getElementById('youtube-grid');
+            youtubeContainer.innerHTML = mediaItems.youtube.map(item => `
+                <div class="group cursor-pointer bg-white/5 rounded-xl overflow-hidden border border-white/5 hover:border-white/20 transition hover:-translate-y-1"
+                     onclick="playTrack('${item.title}', '${item.artist}', '${item.cover}', 'youtube')">
+                    <div class="relative aspect-video overflow-hidden">
+                        <img src="${item.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white flex items-center space-x-1">
+                            <i data-lucide="youtube" class="w-3 h-3 text-red-600"></i>
+                            <span>4K</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-sm line-clamp-2 text-white group-hover:text-red-400 transition">${item.title}</h3>
+                        <p class="text-xs text-gray-400 mt-1">${item.artist}</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5 font-mono">${item.views}</p>
+                    </div>
+                </div>
+            `).join('');
 
-        let wave = 1;
-        let lastShootTime = 0;
-        let isGameOver = false;
+            // Render Spotify Track List
+            const spotifyContainer = document.getElementById('spotify-list');
+            spotifyContainer.innerHTML = mediaItems.spotify.map((item, index) => `
+                <div class="flex items-center justify-between px-4 py-3 hover:bg-white/10 transition group cursor-pointer"
+                     onclick="playTrack('${item.title}', '${item.artist}', '${item.cover}', 'spotify')">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs font-mono text-gray-500 w-4 group-hover:text-emerald-400">${index + 1}</span>
+                        <img src="${item.cover}" class="w-10 h-10 rounded object-cover">
+                        <div>
+                            <h4 class="text-sm font-semibold text-white group-hover:text-emerald-400 transition">${item.title}</h4>
+                            <p class="text-xs text-gray-400">${item.artist}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400 hidden md:block">${item.album}</span>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs font-mono text-gray-400">${item.duration}</span>
+                        <button class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-white transition">
+                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
 
-        // Controls
-        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-        window.addEventListener('mousedown', shoot);
+            // Render Apple Music Album Cards
+            const appleContainer = document.getElementById('apple-albums');
+            appleContainer.innerHTML = mediaItems.apple.map(item => `
+                <div class="group cursor-pointer bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition"
+                     onclick="playTrack('${item.title}', '${item.artist}', '${item.cover}', 'apple')">
+                    <div class="relative aspect-square rounded-lg overflow-hidden mb-3 shadow-lg">
+                        <img src="${item.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full apple-gradient flex items-center justify-center shadow-lg">
+                                <i data-lucide="play" class="w-5 h-5 fill-white ml-0.5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-sm truncate text-white">${item.title}</h3>
+                    <p class="text-xs text-gray-400 truncate mt-0.5">${item.artist}</p>
+                    <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-pink-400 border border-pink-500/20 font-medium">${item.genre}</span>
+                </div>
+            `).join('');
 
-        function spawnWave() {
-            const count = wave * 3;
-            enemies = [];
-            for (let i = 0; i < count; i++) {
-                let rx, ry;
-                do {
-                    rx = Math.floor(Math.random() * (MAP_WIDTH - 2)) + 1;
-                    ry = Math.floor(Math.random() * (MAP_HEIGHT - 2)) + 1;
-                } while (map[ry * MAP_WIDTH + rx] !== 0);
-
-                enemies.push({
-                    x: (rx + 0.5) * TILE_SIZE,
-                    y: (ry + 0.5) * TILE_SIZE,
-                    hp: 50 + (wave * 10),
-                    speed: 1.5 + (wave * 0.2),
-                    radius: 16
-                });
-            }
+            lucide.createIcons();
         }
 
-        function shoot() {
-            if (isGameOver) return;
-            const now = Date.now();
-            const w = weapons[player.currentWeapon];
-
-            if (now - lastShootTime < w.rate) return;
-            if (w.ammo <= 0) return;
-
-            lastShootTime = now;
-            if (w.ammo !== Infinity) w.ammo--;
-
-            // Hitscan attack
-            for (let p = 0; p < w.pellets; p++) {
-                const spread = (Math.random() - 0.5) * 0.1;
-                const shootAngle = player.angle + spread;
-                
-                for (let d = 0; d < 600; d += 4) {
-                    const cx = player.x + Math.cos(shootAngle) * d;
-                    const cy = player.y + Math.sin(shootAngle) * d;
-
-                    // Wall collision stops bullet
-                    const mapX = Math.floor(cx / TILE_SIZE);
-                    const mapY = Math.floor(cy / TILE_SIZE);
-                    if (map[mapY * MAP_WIDTH + mapX] > 0) break;
-
-                    // Enemy hit check
-                    let hit = false;
-                    for (let e of enemies) {
-                        const dist = Math.hypot(e.x - cx, e.y - cy);
-                        if (dist < e.radius) {
-                            e.hp -= w.damage;
-                            hit = true;
-                            break;
-                        }
-                    }
-                    if (hit) break;
-                }
+        // Global Player Trigger
+        function playTrack(title, artist, cover, platform) {
+            document.getElementById('player-title').innerText = title;
+            document.getElementById('player-artist').innerText = artist;
+            document.getElementById('player-cover').src = cover;
+            
+            const badge = document.getElementById('player-badge');
+            if (platform === 'spotify') {
+                badge.className = "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 mt-1";
+                badge.innerText = "SPOTIFY ENGINE";
+            } else if (platform === 'apple') {
+                badge.className = "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-pink-500/20 text-pink-400 mt-1";
+                badge.innerText = "APPLE MUSIC ENGINE";
+            } else if (platform === 'youtube') {
+                badge.className = "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 mt-1";
+                badge.innerText = "YOUTUBE AUDIO STREAM";
             }
-            updateUI();
+
+            isPlaying = true;
+            updatePlayButton();
         }
 
-        function update() {
-            if (isGameOver) return;
-
-            // Player Movement
-            const moveSpeed = 3;
-            const rotSpeed = 0.04;
-
-            if (keys['a'] || keys['arrowleft']) player.angle -= rotSpeed;
-            if (keys['d'] || keys['arrowright']) player.angle += rotSpeed;
-
-            let dx = 0, dy = 0;
-            if (keys['w'] || keys['arrowup']) {
-                dx += Math.cos(player.angle) * moveSpeed;
-                dy += Math.sin(player.angle) * moveSpeed;
-            }
-            if (keys['s'] || keys['arrowdown']) {
-                dx -= Math.cos(player.angle) * moveSpeed;
-                dy -= Math.sin(player.angle) * moveSpeed;
-            }
-
-            // Wall Collision
-            const nextX = player.x + dx;
-            const nextY = player.y + dy;
-            if (map[Math.floor(player.y / TILE_SIZE) * MAP_WIDTH + Math.floor(nextX / TILE_SIZE)] === 0) player.x = nextX;
-            if (map[Math.floor(nextY / TILE_SIZE) * MAP_WIDTH + Math.floor(player.x / TILE_SIZE)] === 0) player.y = nextY;
-
-            // Item Pickup
-            items.forEach((item, index) => {
-                if (Math.hypot(player.x - item.x, player.y - item.y) < 24) {
-                    if (item.type === "weapon") {
-                        player.currentWeapon = item.weaponIndex;
-                    } else if (item.type === "ammo") {
-                        weapons[1].ammo += item.amount;
-                        weapons[2].ammo += item.amount;
-                    }
-                    items.splice(index, 1);
-                    updateUI();
-                }
-            });
-
-            // Enemy AI & Movement
-            enemies.forEach((e, index) => {
-                if (e.hp <= 0) {
-                    enemies.splice(index, 1);
-                    return;
-                }
-                const angleToPlayer = Math.atan2(player.y - e.y, player.x - e.x);
-                e.x += Math.cos(angleToPlayer) * e.speed;
-                e.y += Math.sin(angleToPlayer) * e.speed;
-
-                // Melee Damage
-                if (Math.hypot(player.x - e.x, player.y - e.y) < 20) {
-                    player.hp -= 0.5;
-                    if (player.hp <= 0) triggerGameOver();
-                }
-            });
-
-            // Wave Clear
-            if (enemies.length === 0) {
-                wave++;
-                spawnWave();
-            }
-
-            updateUI();
+        // Play/Pause State Toggle
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            updatePlayButton();
         }
 
-        function render() {
-            // Background Floor/Ceiling
-            ctx.fillStyle = "#222"; ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
-            ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
-
-            // Raycasting Engine
-            const numRays = canvas.width;
-            const halfFOV = player.fov / 2;
-
-            for (let i = 0; i < numRays; i++) {
-                const rayAngle = (player.angle - halfFOV) + (i / numRays) * player.fov;
-                let distance = 0;
-                let hitType = 0;
-
-                const cos = Math.cos(rayAngle);
-                const sin = Math.sin(rayAngle);
-
-                while (distance < 800) {
-                    distance += 2;
-                    const checkX = Math.floor((player.x + cos * distance) / TILE_SIZE);
-                    const checkY = Math.floor((player.y + sin * distance) / TILE_SIZE);
-
-                    if (checkX < 0 || checkX >= MAP_WIDTH || checkY < 0 || checkY >= MAP_HEIGHT) break;
-
-                    const tile = map[checkY * MAP_WIDTH + checkX];
-                    if (tile > 0) {
-                        hitType = tile;
-                        break;
-                    }
-                }
-
-                // Fish-eye correction
-                const correctedDist = distance * Math.cos(rayAngle - player.angle);
-                const wallHeight = Math.min(canvas.height, (TILE_SIZE * 400) / correctedDist);
-
-                // Render Walls (1 = Grey Outer Wall, 2 = Brown Shelves)
-                ctx.fillStyle = hitType === 1 ? "#777" : "#8B5A2B";
-                ctx.fillRect(i, (canvas.height - wallHeight) / 2, 1, wallHeight);
+        function updatePlayButton() {
+            const icon = document.getElementById('play-icon');
+            if (isPlaying) {
+                icon.setAttribute('data-lucide', 'pause');
+            } else {
+                icon.setAttribute('data-lucide', 'play');
             }
+            lucide.createIcons();
+        }
 
-            // Render Sprites (Enemies & Items)
-            const sprites = [
-                ...enemies.map(e => ({ x: e.x, y: e.y, color: '#e02424', size: 30 })),
-                ...items.map(it => ({ x: it.x, y: it.y, color: '#f59e0b', size: 15 }))
-            ];
-
-            sprites.sort((a, b) => Math.hypot(player.x - b.x, player.y - b.y) - Math.hypot(player.x - a.x, player.y - a.y));
-
-            sprites.forEach(s => {
-                const dx = s.x - player.x;
-                const dy = s.y - player.y;
-                let spriteAngle = Math.atan2(dy, dx) - player.angle;
-
-                while (spriteAngle < -Math.PI) spriteAngle += Math.PI * 2;
-                while (spriteAngle > Math.PI) spriteAngle -= Math.PI * 2;
-
-                const dist = Math.hypot(dx, dy);
-                if (dist > 10 && Math.abs(spriteAngle) < player.fov) {
-                    const screenX = (canvas.width / 2) + Math.tan(spriteAngle) * (canvas.width / 2);
-                    const size = Math.min(200, (s.size * 300) / dist);
-
-                    ctx.fillStyle = s.color;
-                    ctx.beginPath();
-                    ctx.arc(screenX, canvas.height / 2, size / 2, 0, Math.PI * 2);
-                    ctx.fill();
+        // Tab Switching Prototype Function
+        function switchTab(tab) {
+            const tabs = ['explore', 'youtube', 'spotify', 'apple'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`nav-${t}`);
+                if (el) {
+                    if (t === tab) {
+                        el.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition bg-white/10 text-white";
+                    } else {
+                        el.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition";
+                    }
                 }
             });
         }
 
-        function updateUI() {
-            document.getElementById('hp').innerText = Math.max(0, Math.floor(player.hp));
-            document.getElementById('wave').innerText = wave;
-            document.getElementById('enemies').innerText = enemies.length;
-            const w = weapons[player.currentWeapon];
-            document.getElementById('weapon-name').innerText = w.name;
-            document.getElementById('ammo').innerText = w.ammo === Infinity ? "Infinite" : w.ammo;
-            document.getElementById('gun-graphic').style.backgroundColor = w.color;
-        }
-
-        function triggerGameOver() {
-            isGameOver = true;
-            document.getElementById('game-over').style.display = 'flex';
-        }
-
-        document.getElementById('game-over').addEventListener('click', () => {
-            player.hp = 100;
-            player.x = 8 * TILE_SIZE;
-            player.y = 8 * TILE_SIZE;
-            player.currentWeapon = 0;
-            wave = 1;
-            isGameOver = false;
-            document.getElementById('game-over').style.display = 'none';
-            spawnWave();
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
         });
-
-        // Game Loop
-        spawnWave();
-        function loop() {
-            update();
-            render();
-            requestAnimationFrame(loop);
-        }
-        loop();
     </script>
 </body>
 </html>
