@@ -3,598 +3,357 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Gutenberg 3D Grand Library</title>
+  <title>Arena Wave Shooter</title>
   <style>
-    body {
+    body, html {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      font-family: 'Georgia', serif;
-      background-color: #0d0a08;
-      user-select: none;
+      background-color: #000;
+      font-family: sans-serif;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
     }
     #crosshair {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 6px;
-      height: 6px;
-      background: #ffdfa9;
-      border: 2px solid #000;
+      width: 10px;
+      height: 10px;
+      background-color: rgba(255, 255, 255, 0.8);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      z-index: 10;
+    }
+    #hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #000;
+      pointer-events: none;
     }
     #instructions {
       position: absolute;
-      top: 50%;
+      top: 0;
+      left: 0;
       width: 100%;
-      text-align: center;
-      color: #fcecd2;
-      font-size: 22px;
-      background: rgba(18, 12, 8, 0.92);
-      padding: 30px 0;
-      cursor: pointer;
-      z-index: 10;
-      border-top: 3px solid #8c6747;
-      border-bottom: 3px solid #8c6747;
-    }
-    #hover-title {
-      position: absolute;
-      bottom: 15%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 10, 6, 0.95);
-      color: #fcecd2;
-      padding: 10px 20px;
-      border-radius: 4px;
-      border: 1px solid #8c6747;
-      font-size: 16px;
-      pointer-events: none;
-      display: none;
-      z-index: 12;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
-    }
-    /* Minimap Widget */
-    #minimap-box {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 160px;
-      height: 160px;
-      background: #18110b;
-      border: 3px solid #8c6747;
-      box-shadow: 4px 4px 12px rgba(0,0,0,0.8);
-      z-index: 15;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       cursor: pointer;
     }
-    #minimap-label {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 10px;
-      font-family: sans-serif;
-      font-weight: bold;
-      background: #8c6747;
-      color: #110c08;
-      padding: 2px 0;
-    }
-    /* Fast Travel & Map Overlay */
-    #full-map-modal {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 650px;
-      background: #f7f1e5;
-      border: 4px solid #4a3324;
-      box-shadow: 12px 12px 0px #000;
-      padding: 25px;
-      z-index: 30;
-    }
-    #full-map-modal h2 { margin-top: 0; text-align: center; border-bottom: 2px solid #4a3324; padding-bottom: 10px; color: #2c1d11; }
-    .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-    .map-btn { padding: 15px; background: #ebdcc9; border: 2px solid #4a3324; font-weight: bold; font-family: inherit; color: #2c1d11; cursor: pointer; text-align: center; box-shadow: 3px 3px 0px #4a3324; }
-    .map-btn:hover { background: #4a3324; color: #f7f1e5; }
-
-    /* Search Desk Modal */
-    #search-modal {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      background: #f7f1e5;
-      border: 4px solid #4a3324;
-      box-shadow: 10px 10px 0px #000;
-      padding: 25px;
-      z-index: 30;
-      text-align: center;
-      color: #2c1d11;
-    }
-    #search-input {
-      width: 85%;
-      padding: 10px;
-      font-family: inherit;
-      font-size: 16px;
-      border: 2px solid #4a3324;
-      margin-bottom: 15px;
-      background: #fff;
-    }
-
-    /* Book Reader Overlay */
-    #book-modal {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 75%;
-      max-width: 750px;
-      height: 82vh;
-      background: #f4ecd8;
-      color: #2b1e16;
-      border: 6px solid #3d2619;
-      box-shadow: 15px 15px 0px #000;
-      padding: 40px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      z-index: 25;
-    }
-    #book-modal h1 { margin-top: 0; border-bottom: 2px solid #3d2619; padding-bottom: 8px; font-size: 28px; }
-    #book-modal h3 { margin-top: 0; font-style: italic; color: #664632; font-weight: normal; }
-    #book-content { font-size: 17px; line-height: 1.8; text-indent: 25px; white-space: pre-wrap; margin-top: 20px; }
-    .ui-btn { margin-top: 20px; padding: 10px 22px; background: #3d2619; color: #f4ecd8; border: none; font-family: inherit; font-weight: bold; cursor: pointer; font-size: 14px; }
-    .ui-btn:hover { background: #664632; }
+    #instructions h1 { font-size: 48px; margin-bottom: 10px; }
+    #instructions p { font-size: 20px; color: #ccc; }
   </style>
+  <!-- Three.js and PointerLockControls from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 </head>
 <body>
 
+  <div id="game-container"></div>
   <div id="crosshair"></div>
-  <div id="hover-title"></div>
-  <div id="instructions">GRAND GUTENBERG DIGITAL LIBRARY<br><small>(Click to Enter | WASD = Walk | Hover = Title | Click Book = Read | M = Map)</small></div>
-
-  <!-- Minimap -->
-  <div id="minimap-box" onclick="toggleFullMap(true)">
-    <canvas id="minimap-canvas" width="160" height="160"></canvas>
-    <div id="minimap-label">LIBRARY DIRECTORY (M)</div>
+  <div id="hud">
+    <div>HEALTH: <span id="health">100</span></div>
+    <div>WAVE: <span id="wave">1</span></div>
+    <div>ENEMIES: <span id="enemies">0</span></div>
   </div>
 
-  <!-- Search Desk Modal -->
-  <div id="search-modal">
-    <h3>LIBRARIAN'S CATALOG DESK</h3>
-    <p>Search Project Gutenberg's collection of 70,000+ public domain classics:</p>
-    <input type="text" id="search-input" placeholder="e.g. Shakespeare, Poe, Sci-Fi..." onkeydown="if(event.key==='Enter') executeSearch()">
-    <br>
-    <button class="ui-btn" onclick="executeSearch()">Stock Central Display</button>
-    <button class="ui-btn" style="background:#8c6747;" onclick="closeSearch()">Cancel</button>
-  </div>
-
-  <!-- Fast Travel Directory -->
-  <div id="full-map-modal">
-    <h2>LIBRARY WING DIRECTORY</h2>
-    <div class="map-grid">
-      <button class="map-btn" onclick="teleportTo(0, 0)">ROTUNDA & DESK</button>
-      <button class="map-btn" onclick="teleportTo(-22, 0)">FICTION HALL</button>
-      <button class="map-btn" onclick="teleportTo(22, 0)">HISTORY WING</button>
-      <button class="map-btn" onclick="teleportTo(0, -22)">SCIENCE & TECH</button>
-      <button class="map-btn" onclick="teleportTo(0, 22)">POETRY & DRAMA</button>
-      <button class="map-btn" onclick="teleportTo(-22, -22)">PHILOSOPHY HALL</button>
-    </div>
-    <div style="text-align: center; margin-top: 20px;">
-      <button class="ui-btn" onclick="toggleFullMap(false)">Resume Exploring</button>
-    </div>
-  </div>
-
-  <!-- Book Reader UI -->
-  <div id="book-modal">
-    <h1 id="book-title">Loading Title...</h1>
-    <h3 id="book-author">Author Unknown</h3>
-    <div id="book-content">Retrieving public domain manuscript from Project Gutenberg servers...</div>
-    <button class="ui-btn" onclick="closeBook()">Return Book to Shelf (ESC)</button>
+  <div id="instructions">
+    <h1>CLICK TO PLAY</h1>
+    <p>WASD to Move | MOUSE to Look | LEFT CLICK to Shoot</p>
   </div>
 
   <script>
-    // --- 1. THREE.JS ATMOSPHERIC ARCHITECTURE ---
+    // --- GAME STATE ---
+    let health = 100;
+    let wave = 1;
+    let enemies = [];
+    let destructibles = [];
+    let bullets = [];
+
+    // --- THREE.JS SETUP ---
+    const container = document.getElementById('game-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f0b08);
-    scene.fog = new THREE.FogExp2(0x0f0b08, 0.035);
+    scene.fog = new THREE.FogExp2(0x111116, 0.015);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 1.6, 0);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
 
-    // Warm Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xffdfa9, 0.4);
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
 
-    // Warm Brass Ceiling Lantern
-    const mainLantern = new THREE.PointLight(0xffb84d, 1.2, 40);
-    mainLantern.position.set(0, 5, 0);
-    scene.add(mainLantern);
+    const pointLight = new THREE.PointLight(0xffaa44, 1, 50);
+    pointLight.position.set(0, 15, 0);
+    pointLight.castShadow = true;
+    scene.add(pointLight);
 
-    // --- 2. ENCLOSED ROOM ARCHITECTURE (WALLS & WOOD FLOORS) ---
-    const colliders = [];
-
-    // Grand Floor (Dark Oak Wood Finish)
-    const floorGeo = new THREE.PlaneGeometry(70, 70);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x24170f, roughness: 0.6 });
+    // --- ENVIRONMENT (ARENA ROOM) ---
+    const roomSize = 60;
+    
+    // Floor
+    const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x222225, roughness: 0.8 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
     scene.add(floor);
 
-    // Ceiling
-    const ceilGeo = new THREE.PlaneGeometry(70, 70);
-    const ceilMat = new THREE.MeshStandardMaterial({ color: 0x120c08, roughness: 0.9 });
-    const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
-    ceiling.position.y = 7;
-    ceiling.rotation.x = Math.PI / 2;
-    scene.add(ceiling);
-
-    // Perimeter Enclosed Walls (Plaster & Timber)
-    function createWall(x, z, w, h, d) {
-      const wallGeo = new THREE.BoxGeometry(w, h, d);
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.9 });
+    // Walls
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x333338, roughness: 0.6 });
+    const wallHeight = 15;
+    
+    const createWall = (x, z, ry, width) => {
+      const wallGeo = new THREE.PlaneGeometry(width, wallHeight);
       const wall = new THREE.Mesh(wallGeo, wallMat);
-      wall.position.set(x, h/2, z);
+      wall.position.set(x, wallHeight / 2, z);
+      wall.rotation.y = ry;
+      wall.receiveShadow = true;
       scene.add(wall);
-      colliders.push(wall);
-    }
-    createWall(0, -35, 70, 7, 1);
-    createWall(0, 35, 70, 7, 1);
-    createWall(-35, 0, 1, 7, 70);
-    createWall(35, 0, 1, 7, 70);
+    };
 
-    // Grand Columns
-    function createColumn(x, z) {
-      const colGeo = new THREE.CylinderGeometry(0.6, 0.6, 7, 12);
-      const colMat = new THREE.MeshStandardMaterial({ color: 0x1c120b, roughness: 0.7 });
-      const col = new THREE.Mesh(colGeo, colMat);
-      col.position.set(x, 3.5, z);
-      scene.add(col);
-      colliders.push(col);
-    }
-    createColumn(-8, -8); createColumn(8, -8);
-    createColumn(-8, 8);  createColumn(8, 8);
+    createWall(0, -roomSize / 2, 0, roomSize);
+    createWall(0, roomSize / 2, Math.PI, roomSize);
+    createWall(-roomSize / 2, 0, Math.PI / 2, roomSize);
+    createWall(roomSize / 2, 0, -Math.PI / 2, roomSize);
 
-    // --- 3. CATALOG DESK & BOOKSHELVES ---
-    const interactiveObjects = [];
+    // --- DESTRUCTIBLE OBJECTS (Shelves / Pillars) ---
+    function spawnDestructibles() {
+      const boxGeo = new THREE.BoxGeometry(2, 4, 2);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
+      
+      const positions = [
+        [-15, 2, -15], [15, 2, -15], [-15, 2, 15], [15, 2, 15],
+        [0, 2, -10], [-10, 2, 0], [10, 2, 0]
+      ];
 
-    // Oak Desk in Central Rotunda
-    const deskGeo = new THREE.BoxGeometry(3.2, 1.1, 1.5);
-    const deskMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1b, roughness: 0.5 });
-    const catalogDesk = new THREE.Mesh(deskGeo, deskMat);
-    catalogDesk.position.set(0, 0.55, -3);
-    catalogDesk.userData = { type: 'searchDesk' };
-    scene.add(catalogDesk);
-    interactiveObjects.push(catalogDesk);
-    colliders.push(catalogDesk);
-
-    // Brass Desk Lamp Light
-    const deskLamp = new THREE.PointLight(0xffa200, 1.5, 8);
-    deskLamp.position.set(0, 1.5, -3);
-    scene.add(deskLamp);
-
-    // Dedicated Search Shelf
-    let searchShelfGroup = new THREE.Group();
-    searchShelfGroup.position.set(0, 0, -6.5);
-    scene.add(searchShelfGroup);
-
-    function buildBookshelf(group, x, y, z, rotY) {
-      group.position.set(x, y, z);
-      group.rotation.y = rotY;
-
-      // Tall Wooden Bookcase Frame
-      const frameGeo = new THREE.BoxGeometry(5.5, 4.2, 0.8);
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x26160c, roughness: 0.6 });
-      const frame = new THREE.Mesh(frameGeo, frameMat);
-      frame.position.y = 2.1;
-      group.add(frame);
-      colliders.push(frame);
-
-      // Shelving Light
-      const light = new THREE.PointLight(0xffc266, 0.6, 6);
-      light.position.set(0, 3, 0.5);
-      group.add(light);
-    }
-
-    function populateGutenbergBooks(group, booksData) {
-      // Clear old books
-      for (let i = group.children.length - 1; i >= 0; i--) {
-        const obj = group.children[i];
-        if (obj.userData && obj.userData.type === 'book') {
-          const idx = interactiveObjects.indexOf(obj);
-          if (idx > -1) interactiveObjects.splice(idx, 1);
-          group.remove(obj);
-        }
-      }
-
-      // Spawn books on shelves
-      const spineColors = [0x7a1c1c, 0x1c3b7a, 0x1c7a3b, 0x5a1c7a, 0x6e511c];
-      booksData.slice(0, 9).forEach((book, i) => {
-        const bookGeo = new THREE.BoxGeometry(0.28, 0.8, 0.5);
-        const bookMat = new THREE.MeshStandardMaterial({
-          color: spineColors[i % spineColors.length],
-          roughness: 0.4
-        });
-        const mesh = new THREE.Mesh(bookGeo, bookMat);
-        mesh.position.set(-2.0 + (i * 0.48), 2.1, 0.1);
-        mesh.userData = {
-          type: 'book',
-          title: book.title,
-          author: book.authors && book.authors[0] ? book.authors[0].name : "Unknown Author",
-          id: book.id
-        };
-        group.add(mesh);
-        interactiveObjects.push(mesh);
+      positions.forEach(pos => {
+        const crate = new THREE.Mesh(boxGeo, boxMat.clone());
+        crate.position.set(...pos);
+        crate.castShadow = true;
+        crate.receiveShadow = true;
+        crate.userData = { hp: 3, isDestructible: true };
+        scene.add(crate);
+        destructibles.push(crate);
       });
     }
+    spawnDestructibles();
 
-    buildBookshelf(searchShelfGroup, 0, 0, -6.5, 0);
-
-    // Initial load of Gutenberg classics for the central shelf
-    async function loadDefaultBooks() {
-      try {
-        const res = await fetch('https://gutendex.com/books/?sort=popular');
-        const data = await res.json();
-        populateGutenbergBooks(searchShelfGroup, data.results);
-      } catch(e) { console.error("Could not fetch Gutenberg defaults."); }
-    }
-    loadDefaultBooks();
-
-    // --- 4. CATEGORY WINGS ---
-    const categories = [
-      { name: "Fiction", topic: "fiction", x: -22, z: 0 },
-      { name: "History", topic: "history", x: 22, z: 0 },
-      { name: "Science", topic: "science", x: 0, z: -22 },
-      { name: "Poetry", topic: "poetry", x: 0, z: 22 },
-      { name: "Philosophy", topic: "philosophy", x: -22, z: -22 }
-    ];
-
-    categories.forEach(cat => {
-      const wingGroup = new THREE.Group();
-      scene.add(wingGroup);
-      buildBookshelf(wingGroup, cat.x, 0, cat.z, 0);
-
-      fetch(`https://gutendex.com/books/?topic=${cat.topic}`)
-        .then(res => res.json())
-        .then(data => populateGutenbergBooks(wingGroup, data.results))
-        .catch(err => console.log("Category load failed."));
-    });
-
-    // --- 5. FIRST-PERSON NAVIGATION & COLLISION ---
-    const controls = new THREE.PointerLockControls(camera, document.body);
-    const instructions = document.getElementById('instructions');
-    const hoverTitle = document.getElementById('hover-title');
-    const searchModal = document.getElementById('search-modal');
-    const fullMapModal = document.getElementById('full-map-modal');
-    const bookModal = document.getElementById('book-modal');
-
-    instructions.addEventListener('click', () => controls.lock());
-    controls.addEventListener('lock', () => instructions.style.display = 'none');
-    controls.addEventListener('unlock', () => {
-      if (searchModal.style.display !== 'block' && fullMapModal.style.display !== 'block' && bookModal.style.display !== 'block') {
-        instructions.style.display = '';
-      }
-    });
+    // --- PLAYER CONTROLS ---
+    camera.position.set(0, 1.6, 20);
 
     let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-    const velocity = new THREE.Vector3();
-    const direction = new THREE.Vector3();
-    let prevTime = performance.now();
+    let yaw = 0, pitch = 0;
+    let isLocked = false;
+
+    const instructions = document.getElementById('instructions');
+
+    instructions.addEventListener('click', () => {
+      document.body.requestPointerLock();
+    });
+
+    document.addEventListener('pointerlockchange', () => {
+      if (document.pointerLockElement === document.body) {
+        isLocked = true;
+        instructions.style.display = 'none';
+      } else {
+        isLocked = false;
+        instructions.style.display = 'flex';
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isLocked) return;
+      yaw -= e.movementX * 0.002;
+      pitch -= e.movementY * 0.002;
+      pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, pitch));
+    });
 
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') moveForward = true;
-      if (e.code === 'KeyS' || e.code === 'ArrowDown') moveBackward = true;
-      if (e.code === 'KeyA' || e.code === 'ArrowLeft') moveLeft = true;
-      if (e.code === 'KeyD' || e.code === 'ArrowRight') moveRight = true;
-      if (e.code === 'KeyM') toggleFullMap(true);
-      if (e.code === 'Escape') {
-        closeBook();
-        closeSearch();
-        toggleFullMap(false);
-      }
+      if (e.code === 'KeyW') moveForward = true;
+      if (e.code === 'KeyS') moveBackward = true;
+      if (e.code === 'KeyA') moveLeft = true;
+      if (e.code === 'KeyD') moveRight = true;
     });
 
     document.addEventListener('keyup', (e) => {
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') moveForward = false;
-      if (e.code === 'KeyS' || e.code === 'ArrowDown') moveBackward = false;
-      if (e.code === 'KeyA' || e.code === 'ArrowLeft') moveLeft = false;
-      if (e.code === 'KeyD' || e.code === 'ArrowRight') moveRight = false;
+      if (e.code === 'KeyW') moveForward = false;
+      if (e.code === 'KeyS') moveBackward = false;
+      if (e.code === 'KeyA') moveLeft = false;
+      if (e.code === 'KeyD') moveRight = false;
     });
 
-    // Raycast Interaction & Tooltips
-    const raycaster = new THREE.Raycaster();
-
-    document.addEventListener('click', () => {
-      if (!controls.isLocked) return;
-
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(interactiveObjects);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0].object;
-        if (hit.userData.type === 'searchDesk') {
-          openSearch();
-        } else if (hit.userData.type === 'book') {
-          openGutenbergBook(hit.userData);
-        }
-      }
+    document.addEventListener('mousedown', (e) => {
+      if (isLocked && e.button === 0) shoot();
     });
 
-    function checkHoverTooltips() {
-      if (!controls.isLocked) {
-        hoverTitle.style.display = 'none';
-        return;
-      }
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(interactiveObjects);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0].object;
-        if (hit.userData.type === 'book') {
-          hoverTitle.style.display = 'block';
-          hoverTitle.innerText = `Book: "${hit.userData.title}" by ${hit.userData.author}`;
-        } else if (hit.userData.type === 'searchDesk') {
-          hoverTitle.style.display = 'block';
-          hoverTitle.innerText = `Catalog Search Desk (Click to Search Gutenberg)`;
-        }
-      } else {
-        hoverTitle.style.display = 'none';
-      }
+    // --- SHOOTING MECHANIC ---
+    function shoot() {
+      const bulletGeo = new THREE.SphereGeometry(0.2, 8, 8);
+      const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+      const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+      
+      bullet.position.copy(camera.position);
+      
+      const dir = new THREE.Vector3(0, 0, -1);
+      dir.applyEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+      bullet.userData = { velocity: dir.multiplyScalar(1.2), life: 60 };
+      
+      bullets.push(bullet);
+      scene.add(bullet);
     }
 
-    // --- 6. GUTENDEX API FETCHING & MANUSCRIPT READER ---
-    function openSearch() {
-      controls.unlock();
-      searchModal.style.display = 'block';
-      document.getElementById('search-input').focus();
-    }
-
-    function closeSearch() {
-      searchModal.style.display = 'none';
-    }
-
-    async function executeSearch() {
-      const query = document.getElementById('search-input').value.trim();
-      if (!query) return;
-
-      closeSearch();
-
-      try {
-        const res = await fetch(`https://gutendex.com/books/?search=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          populateGutenbergBooks(searchShelfGroup, data.results);
-        }
-      } catch (e) { console.error("Search failed:", e); }
-    }
-
-    async function openGutenbergBook(bookData) {
-      controls.unlock();
-      bookModal.style.display = 'block';
-      document.getElementById('book-title').innerText = bookData.title;
-      document.getElementById('book-author').innerText = `by ${bookData.author}`;
-      document.getElementById('book-content').innerText = "Opening manuscript and loading text from Project Gutenberg...";
-
-      try {
-        // Fetch raw manuscript text directly from Gutenberg via cors proxy/API URL
-        const txtUrl = `https://www.gutenberg.org/files/${bookData.id}/${bookData.id}-0.txt`;
-        const fallbackUrl = `https://www.gutenberg.org/cache/epub/${bookData.id}/pg${bookData.id}.txt`;
+    // --- WAVES & ENEMIES ---
+    function spawnWave() {
+      const count = wave * 4;
+      document.getElementById('wave').innerText = wave;
+      
+      for (let i = 0; i < count; i++) {
+        const enemyGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const enemyMat = new THREE.MeshStandardMaterial({ color: 0xff2222 });
+        const enemy = new THREE.Mesh(enemyGeo, enemyMat);
         
-        let res = await fetch(txtUrl);
-        if (!res.ok) res = await fetch(fallbackUrl);
-
-        if (res.ok) {
-          const rawText = await res.text();
-          // Display the first 5,000 characters cleanly as a readable excerpt
-          const cleanText = rawText.substring(0, 5000) + "\n\n[... Continued in Project Gutenberg Collection ...]";
-          document.getElementById('book-content').innerText = cleanText;
-        } else {
-          document.getElementById('book-content').innerText = "Public domain full text is available via Project Gutenberg ID #" + bookData.id;
-        }
-      } catch (e) {
-        document.getElementById('book-content').innerText = "Public Domain Title: " + bookData.title + "\n\nAuthor: " + bookData.author + "\n\nCatalog Gutenberg ID: #" + bookData.id;
+        // Random placement around edges
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 22 + Math.random() * 5;
+        enemy.position.set(Math.cos(angle) * dist, 0.75, Math.sin(angle) * dist);
+        enemy.castShadow = true;
+        enemy.userData = { hp: 2 };
+        
+        enemies.push(enemy);
+        scene.add(enemy);
       }
+      document.getElementById('enemies').innerText = enemies.length;
     }
+    spawnWave();
 
-    function closeBook() {
-      bookModal.style.display = 'none';
-    }
-
-    function toggleFullMap(show) {
-      if (show) { controls.unlock(); fullMapModal.style.display = 'block'; }
-      else { fullMapModal.style.display = 'none'; }
-    }
-
-    function teleportTo(x, z) {
-      camera.position.set(x, 1.6, z);
-      toggleFullMap(false);
-      controls.lock();
-    }
-
-    // --- 7. MINIMAP & RENDER LOOP ---
-    const minimapCanvas = document.getElementById('minimap-canvas');
-    const ctx = minimapCanvas.getContext('2d');
-
-    function drawMinimap() {
-      ctx.clearRect(0, 0, 160, 160);
-      ctx.fillStyle = '#18110b';
-      ctx.fillRect(0, 0, 160, 160);
-
-      // Rotunda Hub
-      ctx.strokeStyle = '#8c6747';
-      ctx.strokeRect(70, 70, 20, 20);
-
-      // Category Wings
-      ctx.fillStyle = '#8c6747';
-      categories.forEach(cat => {
-        const mx = 80 + (cat.x * 2.1);
-        const mz = 80 + (cat.z * 2.1);
-        ctx.fillRect(mx - 5, mz - 5, 10, 10);
-      });
-
-      // Red Player Dot
-      const px = 80 + (camera.position.x * 2.1);
-      const pz = 80 + (camera.position.z * 2.1);
-      ctx.fillStyle = '#ff3333';
-      ctx.beginPath();
-      ctx.arc(px, pz, 4, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // --- GAME LOOP ---
+    const clock = new THREE.Clock();
 
     function animate() {
       requestAnimationFrame(animate);
 
-      const time = performance.now();
-      if (controls.isLocked) {
-        const delta = (time - prevTime) / 1000;
+      if (isLocked) {
+        // Player movement
+        const delta = clock.getDelta();
+        const speed = 10 * delta;
+        
+        const moveDir = new THREE.Vector3();
+        if (moveForward) moveDir.z -= 1;
+        if (moveBackward) moveDir.z += 1;
+        if (moveLeft) moveDir.x -= 1;
+        if (moveRight) moveDir.x += 1;
+        moveDir.normalize();
 
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
+        const euler = new THREE.Euler(0, yaw, 0, 'YXZ');
+        moveDir.applyEuler(euler);
+        camera.position.addScaledVector(moveDir, speed);
 
-        direction.z = Number(moveForward) - Number(moveBackward);
-        direction.x = Number(moveRight) - Number(moveLeft);
-        direction.normalize();
+        // Keep player in bounds
+        const maxPos = roomSize / 2 - 1.5;
+        camera.position.x = Math.max(-maxPos, Math.min(maxPos, camera.position.x));
+        camera.position.z = Math.max(-maxPos, Math.min(maxPos, camera.position.z));
 
-        if (moveForward || moveBackward) velocity.z -= direction.z * 28.0 * delta;
-        if (moveLeft || moveRight) velocity.x -= direction.x * 28.0 * delta;
+        // Camera rotation
+        camera.rotation.set(0, 0, 0);
+        camera.rotation.y = yaw;
+        camera.rotation.x = pitch;
 
-        // Collision detection against walls, columns & bookcases
-        const oldPos = camera.position.clone();
+        // Update Bullets
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          b.position.add(b.userData.velocity);
+          b.userData.life--;
 
-        controls.moveRight(-velocity.x * delta);
-        controls.moveForward(-velocity.z * delta);
+          // Bullet Collision with Destructibles
+          for (let j = destructibles.length - 1; j >= 0; j--) {
+            const d = destructibles[j];
+            if (b.position.distanceTo(d.position) < 1.5) {
+              d.userData.hp--;
+              d.material.color.setHex(0x553311); // Damage visual
+              if (d.userData.hp <= 0) {
+                scene.remove(d);
+                destructibles.splice(j, 1);
+              }
+              scene.remove(b);
+              bullets.splice(i, 1);
+              break;
+            }
+          }
 
-        const playerRadius = 0.5;
-        colliders.forEach(obj => {
-          const box = new THREE.Box3().setFromObject(obj);
-          const playerBox = new THREE.Box3(
-            new THREE.Vector3(camera.position.x - playerRadius, 0, camera.position.z - playerRadius),
-            new THREE.Vector3(camera.position.x + playerRadius, 2, camera.position.z + playerRadius)
-          );
-          if (box.intersectsBox(playerBox)) {
-            camera.position.copy(oldPos);
+          // Bullet Collision with Enemies
+          if (bullets[i]) {
+            for (let j = enemies.length - 1; j >= 0; j--) {
+              const e = enemies[j];
+              if (b.position.distanceTo(e.position) < 1.2) {
+                e.userData.hp--;
+                e.material.color.setHex(0xffffff); // Hit flash
+                setTimeout(() => e.material.color.setHex(0xff2222), 50);
+
+                if (e.userData.hp <= 0) {
+                  scene.remove(e);
+                  enemies.splice(j, 1);
+                  document.getElementById('enemies').innerText = enemies.length;
+                }
+                scene.remove(b);
+                bullets.splice(i, 1);
+                break;
+              }
+            }
+          }
+
+          // Despawn old bullets
+          if (b && b.userData.life <= 0) {
+            scene.remove(b);
+            bullets.splice(i, 1);
+          }
+        }
+
+        // Enemy AI (Move towards player)
+        enemies.forEach(e => {
+          const dir = new THREE.Vector3().subVectors(camera.position, e.position);
+          dir.y = 0; // Keep on ground
+          dir.normalize();
+          e.position.addScaledVector(dir, 4 * delta);
+
+          // Player damage
+          if (e.position.distanceTo(camera.position) < 1.2) {
+            health -= 0.2;
+            document.getElementById('health').innerText = Math.max(0, Math.round(health));
+            if (health <= 0) {
+              alert('Game Over! Refresh to restart.');
+              location.reload();
+            }
           }
         });
-      }
-      prevTime = time;
 
-      checkHoverTooltips();
-      drawMinimap();
+        // Wave Spawning Logic
+        if (enemies.length === 0) {
+          wave++;
+          spawnWave();
+        }
+      }
+
       renderer.render(scene, camera);
     }
+
     animate();
 
+    // Handle Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
